@@ -47,6 +47,7 @@ export default function Home() {
       originalPrice: 120000,
       discount: 29,
       badge: "Best Seller",
+      calification: 4.8,
     },
     {
       id: 2,
@@ -56,6 +57,7 @@ export default function Home() {
       originalPrice: 95000,
       discount: 31,
       badge: "Descuento",
+      calification: 4.5,
     },
     {
       id: 3,
@@ -65,6 +67,7 @@ export default function Home() {
       originalPrice: 65000,
       discount: 31,
       badge: "Best Seller",
+      calification: 4.7,
     },
     {
       id: 4,
@@ -74,6 +77,7 @@ export default function Home() {
       originalPrice: 80000,
       discount: 31,
       badge: "Descuento",
+      calification: 4.6,
     },
   ];
 
@@ -117,7 +121,9 @@ export default function Home() {
 
       {/* Productos */}
       <section className="container mx-auto py-8 px-4">
-        <h2 className="text-xl font-semibold mb-6 text-center">Ofertas Destacadas</h2>
+        <h2 className="text-xl font-semibold mb-6 text-center">
+          Ofertas Destacadas
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
@@ -132,6 +138,10 @@ export default function Home() {
                 <h3 className="font-semibold text-lg">{product.name}</h3>
               </CardHeader>
               <CardContent>
+                <span className="flex items-center gap-1 text-sm">
+                  <Star className="size-4 text-yellow-400 fill-yellow-400" />
+                  {product.calification}/5
+                </span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm line-through text-muted-foreground">
                     ${product.originalPrice.toLocaleString()}
