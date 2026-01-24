@@ -50,32 +50,37 @@ export function ShoppingCartDrawer() {
       quantity: 2,
       image: "https://placehold.co/96x96",
     },
+    {
+      id: "3",
+      name: "Champú nutritivo",
+      variant: "250 ml",
+      price: 18000,
+      quantity: 1,
+      image: "https://placehold.co/96x96",
+    },
   ]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    [items]
+    [items],
   );
 
   const total = subtotal; // Ajusta si agregas impuestos/envio
 
   const remainingForFreeShipping = Math.max(
     FREE_SHIPPING_THRESHOLD - subtotal,
-    0
+    0,
   );
 
-  const progress = Math.min(
-    (subtotal / FREE_SHIPPING_THRESHOLD) * 100,
-    100
-  );
+  const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   const updateQuantity = (id: string, delta: number) => {
     setItems((prev) =>
       prev.map((item) =>
         item.id === id
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -95,8 +100,8 @@ export function ShoppingCartDrawer() {
           <DrawerTitle>Tu carrito</DrawerTitle>
         </DrawerHeader>
 
-        <div className="space-y-4 px-4 pb-4">
-          <div className="rounded-lg border border-border bg-muted/40 p-3">
+        <div className="flex flex-col gap-4 px-4 pb-4 max-h-[calc(100svh-160px)]">
+          <div className="shrink-0 rounded-lg border border-border bg-muted/40 p-3">
             <div className="mb-2 flex items-center justify-between text-sm font-semibold">
               <span>Envío gratis</span>
               <span className="text-primary">{progress.toFixed(0)}%</span>
@@ -111,12 +116,12 @@ export function ShoppingCartDrawer() {
               {remainingForFreeShipping === 0
                 ? "Has desbloqueado el envío gratis"
                 : `Te faltan ${currencyFormatter.format(
-                    remainingForFreeShipping
+                    remainingForFreeShipping,
                   )} para envío gratis`}
             </p>
           </div>
 
-          <div className="no-scrollbar max-h-[calc(100vh-340px)] space-y-3 overflow-y-auto pr-1">
+          <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto pr-1">
             {items.map((item) => (
               <div
                 key={item.id}
@@ -189,15 +194,19 @@ export function ShoppingCartDrawer() {
             ))}
           </div>
 
-          <div className="space-y-2 rounded-lg border border-border p-4">
+          <div className="shrink-0 space-y-2 rounded-lg border border-border p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold">{currencyFormatter.format(subtotal)}</span>
+              <span className="font-semibold">
+                {currencyFormatter.format(subtotal)}
+              </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Envío</span>
               <span className="font-semibold">
-                {remainingForFreeShipping === 0 ? "Gratis" : currencyFormatter.format(8000)}
+                {remainingForFreeShipping === 0
+                  ? "Gratis"
+                  : currencyFormatter.format(8000)}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm font-semibold">
@@ -207,7 +216,7 @@ export function ShoppingCartDrawer() {
           </div>
         </div>
 
-        <DrawerFooter className="gap-2 border-t border-border bg-background/60">
+        <DrawerFooter className="gap-2 border-t border-border bg-background/60 sticky bottom-0 pt-3 pb-3">
           <Button className="w-full">Ir a checkout</Button>
           <DrawerClose asChild>
             <Button className="w-full" variant="outline">

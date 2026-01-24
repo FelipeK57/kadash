@@ -52,14 +52,13 @@ export default function Home() {
                 href={category.href}
                 className="flex flex-col items-center gap-2 group"
               >
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 group-hover:border-primary transition-colors">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-all"
-                  />
-                </div>
+                <Image
+                  src={category.image}
+                  alt={category.name}
+                  width={128}
+                  height={128}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-primary/20 group-hover:border-primary transition-colors"
+                />
                 <span className="text-sm font-semibold text-center max-w-32 group-hover:text-primary transition-colors">
                   {category.name}
                 </span>
