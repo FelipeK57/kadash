@@ -40,7 +40,7 @@ export function ShoppingCartDrawer() {
       variant: "Cabello seco",
       price: 22500,
       quantity: 1,
-      image: "https://placehold.co/96x96",
+      image: "/product.jpeg",
     },
     {
       id: "2",
@@ -48,7 +48,7 @@ export function ShoppingCartDrawer() {
       variant: "30 ml",
       price: 45000,
       quantity: 2,
-      image: "https://placehold.co/96x96",
+      image: "/product.jpeg",
     },
     {
       id: "3",
@@ -56,7 +56,7 @@ export function ShoppingCartDrawer() {
       variant: "250 ml",
       price: 18000,
       quantity: 1,
-      image: "https://placehold.co/96x96",
+      image: "/product.jpeg",
     },
   ]);
 

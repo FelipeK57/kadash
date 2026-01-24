@@ -1,5 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Heart, ShoppingBag, ShoppingCart, Star } from "lucide-react";
 
 export default function Home() {
   const categories = [
@@ -30,6 +38,45 @@ export default function Home() {
     },
   ];
 
+  const products = [
+    {
+      id: 1,
+      name: "Kit Reparación Profunda",
+      image: "/product.jpeg",
+      price: 85000,
+      originalPrice: 120000,
+      discount: 29,
+      badge: "Best Seller",
+    },
+    {
+      id: 2,
+      name: "Serum Facial Hidratante",
+      image: "/product.jpeg",
+      price: 65000,
+      originalPrice: 95000,
+      discount: 31,
+      badge: "Descuento",
+    },
+    {
+      id: 3,
+      name: "Champú Nutritivo",
+      image: "/product.jpeg",
+      price: 45000,
+      originalPrice: 65000,
+      discount: 31,
+      badge: "Best Seller",
+    },
+    {
+      id: 4,
+      name: "Acondicionador Reparador",
+      image: "/product.jpeg",
+      price: 55000,
+      originalPrice: 80000,
+      discount: 31,
+      badge: "Descuento",
+    },
+  ];
+
   return (
     <main className="flex flex-col">
       <Image
@@ -40,8 +87,8 @@ export default function Home() {
         className="w-full h-auto"
       />
       {/* Categorias */}
-      <section className="container mx-auto p-4">
-        <h2 className="text-xl font-semibold text-center mb-4">
+      <section className="container mx-auto px-4 py-8">
+        <h2 className="text-xl font-semibold text-center mb-6">
           Explora nuestras categorías
         </h2>
         <div className="overflow-x-auto md:overflow-x-visible">
@@ -65,6 +112,43 @@ export default function Home() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Productos */}
+      <section className="container mx-auto py-8 px-4">
+        <h2 className="text-xl font-semibold mb-6 text-center">Ofertas Destacadas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {products.map((product) => (
+            <Card key={product.id} className="shadow-none gap-2">
+              <CardHeader>
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  width={300}
+                  height={300}
+                  className="w-full aspect-square object-cover hover:scale-105 transition-transform"
+                />
+                <h3 className="font-semibold text-lg">{product.name}</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm line-through text-muted-foreground">
+                    ${product.originalPrice.toLocaleString()}
+                  </span>
+                  <span className="font-bold text-primary">
+                    ${product.price.toLocaleString()}
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full gap-2 mt-auto">
+                  <ShoppingBag className="size-4" />
+                  Agregar
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       </section>
     </main>

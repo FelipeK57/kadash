@@ -66,7 +66,7 @@ export const Footer = () => {
 
   return (
     <footer className="flex flex-col border-t border-border">
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
           {/* Logo y redes sociales */}
           <article className="space-y-4 flex flex-col items-center md:items-start">

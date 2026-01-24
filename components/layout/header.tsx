@@ -8,7 +8,7 @@ import { ShoppingCartDrawer } from "./shopping-cart-drawer";
 export const Header = () => {
   return (
     <header className="flex flex-col gap-2 sticky top-0 bg-background">
-      <div className="bg-secondary/50 p-2">
+      <div className="bg-secondary p-2">
         <Image
           src={"./logo.svg"}
           alt="Logo"
