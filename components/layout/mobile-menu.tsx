@@ -40,7 +40,7 @@ export function MobileMenu() {
     },
     { name: "Blog", href: "/blog" },
     { name: "Diagnóstico Capilar", href: "/diagnostico-capilar" },
-    { name: "Punto de Venta", href: "/punto-de-venta" },
+    { name: "Punto de Venta", href: "/puntos-de-venta" },
     { name: "Testimonios", href: "/testimonios" },
   ];
 

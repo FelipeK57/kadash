@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "../ui/button";
 import { Search, User } from "lucide-react";
 import { Input } from "../ui/input";
@@ -9,13 +10,15 @@ export const Header = () => {
   return (
     <header className="flex flex-col gap-2 sticky top-0 bg-background z-50">
       <div className="bg-secondary p-2">
-        <Image
-          src={"./logo.svg"}
-          alt="Logo"
-          width={150}
-          height={50}
-          className="mx-auto h-8"
-        />
+        <Link href="/">
+          <Image
+            src={"./logo.svg"}
+            alt="Logo"
+            width={150}
+            height={50}
+            className="mx-auto h-8"
+          />
+        </Link>
       </div>
       <article className="flex gap-2 px-2">
         <MobileMenu />
@@ -23,9 +26,11 @@ export const Header = () => {
           <Input placeholder="Buscar" className="pr-8" />
           <Search className="absolute right-3 top-2.5 size-4 text-primary" />
         </div>
-        <Button size="icon" variant="ghost">
-          <User className="text-primary" />
-        </Button>
+        <Link href="/cuenta">
+          <Button size="icon" variant="ghost">
+            <User className="text-primary" />
+          </Button>
+        </Link>
         <ShoppingCartDrawer />
       </article>
       <div className="bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">

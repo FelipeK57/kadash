@@ -107,7 +107,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/tiendas"
+                  href="/puntos-de-venta"
                   className="text-sm text-muted-foreground hover:text-primary transition"
                 >
                   Tiendas
@@ -130,10 +130,10 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/politicas"
+                  href="/seguimiento"
                   className="text-sm text-muted-foreground hover:text-primary transition"
                 >
-                  Políticas
+                  Seguimiento
                 </Link>
               </li>
             </ul>

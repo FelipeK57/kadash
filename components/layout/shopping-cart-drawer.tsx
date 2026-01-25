@@ -14,6 +14,7 @@ import {
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 type CartItem = {
   id: string;
@@ -217,7 +218,9 @@ export function ShoppingCartDrawer() {
         </div>
 
         <DrawerFooter className="gap-2 border-t border-border bg-background/60 sticky bottom-0 pt-3 pb-3">
-          <Button className="w-full">Ir a checkout</Button>
+          <Link href="/carrito" asChild>
+            <Button className="w-full">Ir a checkout</Button>
+          </Link>
           <DrawerClose asChild>
             <Button className="w-full" variant="outline">
               Continuar comprando
