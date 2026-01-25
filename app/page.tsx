@@ -7,7 +7,8 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Heart, ShoppingBag, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingBag, Star, Truck, CreditCard, Package, AlertCircle, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const categories = [
@@ -48,6 +49,7 @@ export default function Home() {
       discount: 29,
       badge: "Best Seller",
       calification: 4.8,
+      reviews: 150,
     },
     {
       id: 2,
@@ -58,6 +60,7 @@ export default function Home() {
       discount: 31,
       badge: "Descuento",
       calification: 4.5,
+      reviews: 98,
     },
     {
       id: 3,
@@ -68,6 +71,7 @@ export default function Home() {
       discount: 31,
       badge: "Best Seller",
       calification: 4.7,
+      reviews: 120,
     },
     {
       id: 4,
@@ -78,6 +82,54 @@ export default function Home() {
       discount: 31,
       badge: "Descuento",
       calification: 4.6,
+      reviews: 110,
+    },
+  ];
+
+  const bestSellers = [
+    {
+      id: 5,
+      name: "Mascarilla Reparadora",
+      image: "/product.jpeg",
+      price: 38000,
+      originalPrice: 55000,
+      discount: 31,
+      badge: "Best Seller",
+      rating: 4.7,
+      reviews: 256,
+    },
+    {
+      id: 6,
+      name: "Crema Nutritiva de Noche",
+      image: "/product.jpeg",
+      price: 72000,
+      originalPrice: 105000,
+      discount: 31,
+      badge: "Best Seller",
+      rating: 4.9,
+      reviews: 189,
+    },
+    {
+      id: 7,
+      name: "Tónico Facial Equilibrante",
+      image: "/product.jpeg",
+      price: 52000,
+      originalPrice: 75000,
+      discount: 31,
+      badge: "Best Seller",
+      rating: 4.6,
+      reviews: 143,
+    },
+    {
+      id: 8,
+      name: "Protector Solar SPF 50",
+      image: "/product.jpeg",
+      price: 48000,
+      originalPrice: 70000,
+      discount: 31,
+      badge: "Best Seller",
+      rating: 4.8,
+      reviews: 215,
     },
   ];
 
@@ -133,20 +185,25 @@ export default function Home() {
                   alt={product.name}
                   width={300}
                   height={300}
-                  className="w-full aspect-square object-cover hover:scale-105 transition-transform"
+                  className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
                 />
-                <h3 className="font-semibold text-lg">{product.name}</h3>
+                <div className="flex justify-between items-center gap-2">
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Button className="group" variant="ghost" size="icon-lg">
+                    <Heart className="size-6 text-primary group-hover:fill-primary" />
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
                 <span className="flex items-center gap-1 text-sm">
                   <Star className="size-4 text-yellow-400 fill-yellow-400" />
-                  {product.calification}/5
+                  {product.calification}/5 ({product.reviews})
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm line-through text-muted-foreground">
+                  <span className="text line-through text-muted-foreground">
                     ${product.originalPrice.toLocaleString()}
                   </span>
-                  <span className="font-bold text-primary">
+                  <span className="font-bold text-xl text-primary">
                     ${product.price.toLocaleString()}
                   </span>
                 </div>
@@ -159,6 +216,126 @@ export default function Home() {
               </CardFooter>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* Best Sellers */}
+      <section className="container mx-auto py-8 px-4">
+        <h2 className="text-xl font-semibold mb-6 text-center">Más Vendidos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {bestSellers.map((product) => (
+            <Card key={product.id} className="shadow-none gap-2">
+              <CardHeader>
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  width={300}
+                  height={300}
+                  className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
+                />
+                <div className="flex justify-between items-center gap-2">
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Button className="group" variant="ghost" size="icon-lg">
+                    <Heart className="size-6 text-primary group-hover:fill-primary" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <span className="flex items-center gap-1 text-sm">
+                  <Star className="size-4 text-yellow-400 fill-yellow-400" />
+                  {product.rating}/5 ({product.reviews})
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text line-through text-muted-foreground">
+                    ${product.originalPrice.toLocaleString()}
+                  </span>
+                  <span className="font-bold text-xl text-primary">
+                    ${product.price.toLocaleString()}
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full gap-2 mt-auto">
+                  <ShoppingBag className="size-4" />
+                  Agregar
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Features/Beneficios */}
+      <section className="w-full bg-primary text-primary-foreground py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            <div className="flex flex-col items-center gap-3">
+              <Truck className="h-8 w-8" />
+              <h3 className="font-semibold text-lg">Envíos a todo el país</h3>
+              <p className="text-sm text-primary-foreground/80 text-center md:text-left">
+                Llega rápido a cualquier parte del país
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <CreditCard className="h-8 w-8" />
+              <h3 className="font-semibold text-lg">Varios métodos de pago</h3>
+              <p className="text-sm text-primary-foreground/80 text-center md:text-left">
+                Paga con tarjeta en distintas plataformas seguras
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <Package className="h-8 w-8" />
+              <h3 className="font-semibold text-lg">Seguimiento de pedidos</h3>
+              <p className="text-sm text-primary-foreground/80 text-center md:text-left">
+                Sigue tu compra en tiempo real
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-3">
+              <AlertCircle className="h-8 w-8" />
+              <h3 className="font-semibold text-lg">Garantía de compra</h3>
+              <p className="text-sm text-primary-foreground/80 text-center md:text-left">
+                Productos 100% auténticos
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center">
+            <h2 className="mb-4 text-3xl md:text-4xl font-bold tracking-tight">
+              Suscríbete a nuestro newsletter
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-muted-foreground md:text-lg">
+              Mantente actualizado con nuestras ofertas exclusivas, lanzamientos de nuevos productos y descuentos especiales. ¡Suscríbete y sé el primero en enterarte!
+            </p>
+            <form className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 mx-auto max-w-md">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <Input
+                    type="email"
+                    placeholder="Tu correo electrónico"
+                    className="pl-10 rounded-lg sm:rounded-r-none sm:rounded-l-lg"
+                  />
+                </div>
+                <Button className="rounded-lg sm:rounded-l-none sm:rounded-r-lg px-6">
+                  Suscribir
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Nos importa tu privacidad.{" "}
+                <Link href="/politicas" className="font-medium hover:underline">
+                  Lee nuestra Política de Privacidad
+                </Link>
+                .
+              </p>
+            </form>
+          </div>
         </div>
       </section>
     </main>
