@@ -218,7 +218,7 @@ export function ShoppingCartDrawer() {
         </div>
 
         <DrawerFooter className="gap-2 border-t border-border bg-background/60 sticky bottom-0 pt-3 pb-3">
-          <Link href="/carrito" asChild>
+          <Link href="/carrito">
             <Button className="w-full">Ir a checkout</Button>
           </Link>
           <DrawerClose asChild>
