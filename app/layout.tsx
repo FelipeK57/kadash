@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/icons/social-media";
+import ScrollToTop from "@/components/scroll-to-top";
 // Supports weights 100-900
 import '@fontsource-variable/montserrat';
 
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen relative`}
       >
+        <ScrollToTop />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
