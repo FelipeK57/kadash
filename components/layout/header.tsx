@@ -12,7 +12,7 @@ export const Header = () => {
       <div className="bg-secondary p-2">
         <Link href="/">
           <Image
-            src={"./logo.svg"}
+            src={"/logo.svg"}
             alt="Logo"
             width={150}
             height={50}

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -180,15 +181,19 @@ export default function Home() {
           {products.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
               <CardHeader>
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={300}
-                  height={300}
-                  className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
-                />
+                <Link href={`/productos/${slugify(product.name)}`}>
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
+                  />
+                </Link>
                 <div className="flex justify-between items-center gap-2">
-                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Link href={`/productos/${slugify(product.name)}`} className="hover:text-primary">
+                    <h3 className="font-semibold text-lg">{product.name}</h3>
+                  </Link>
                   <Button className="group" variant="ghost" size="icon-lg">
                     <Heart className="size-6 text-primary group-hover:fill-primary" />
                   </Button>
@@ -226,15 +231,19 @@ export default function Home() {
           {bestSellers.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
               <CardHeader>
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={300}
-                  height={300}
-                  className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
-                />
+                <Link href={`/productos/${slugify(product.name)}`}>
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
+                  />
+                </Link>
                 <div className="flex justify-between items-center gap-2">
-                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <Link href={`/productos/${slugify(product.name)}`} className="hover:text-primary">
+                    <h3 className="font-semibold text-lg">{product.name}</h3>
+                  </Link>
                   <Button className="group" variant="ghost" size="icon-lg">
                     <Heart className="size-6 text-primary group-hover:fill-primary" />
                   </Button>
