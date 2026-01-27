@@ -8,32 +8,57 @@ import { ShoppingCartDrawer } from "./shopping-cart-drawer";
 
 export const Header = () => {
   return (
-    <header className="flex flex-col gap-2 sticky top-0 bg-background z-50">
-      <div className="bg-secondary p-2">
-        <Link href="/">
-          <Image
-            src={"/logo.svg"}
-            alt="Logo"
-            width={150}
-            height={50}
-            className="mx-auto h-8"
-          />
-        </Link>
+    <header className="sticky top-0 bg-background z-50 border-b border-border">
+      {/* Banda de envío gratis - solo visible en desktop */}
+      <div className="hidden md:block bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">
+        Envío gratis en compras mayores a $50.000
       </div>
-      <article className="flex gap-2 px-2">
-        <MobileMenu />
-        <div className="relative">
-          <Input placeholder="Buscar" className="pr-8" />
-          <Search className="absolute right-3 top-2.5 size-4 text-primary" />
+
+      {/* Header principal - 3 columnas */}
+      <div className="container mx-auto px-4 py-3">
+        <div className="grid grid-cols-3 gap-4 items-center">
+          {/* Columna izquierda: Menu y Buscador */}
+          <div className="flex items-center gap-2">
+            <MobileMenu />
+            <div className="relative flex-1 max-w-xs hidden sm:block">
+              <Input placeholder="Buscar" className="pr-8" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-primary" />
+            </div>
+          </div>
+
+          {/* Columna central: Logo */}
+          <div className="flex justify-center">
+            <Link href="/">
+              <Image
+                src={"/logo.svg"}
+                alt="Logo"
+                width={150}
+                height={50}
+                className="h-8 md:h-10 w-auto"
+              />
+            </Link>
+          </div>
+
+          {/* Columna derecha: Cuenta y Carrito */}
+          <div className="flex items-center justify-end gap-2">
+            <Link href="/cuenta">
+              <Button size="icon" variant="ghost">
+                <User className="text-primary" />
+              </Button>
+            </Link>
+            <ShoppingCartDrawer />
+          </div>
         </div>
-        <Link href="/cuenta">
-          <Button size="icon" variant="ghost">
-            <User className="text-primary" />
-          </Button>
-        </Link>
-        <ShoppingCartDrawer />
-      </article>
-      <div className="bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">
+
+        {/* Buscador móvil (debajo del header en mobile) */}
+        <div className="relative mt-3 sm:hidden">
+          <Input placeholder="Buscar productos..." className="pr-8" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-primary" />
+        </div>
+      </div>
+
+      {/* Banda de envío gratis - visible en mobile debajo del header */}
+      <div className="md:hidden bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">
         Envío gratis en compras mayores a $50.000
       </div>
     </header>

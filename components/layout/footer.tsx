@@ -128,14 +128,6 @@ export const Footer = () => {
                   Preguntas frecuentes
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/seguimiento"
-                  className="text-sm text-muted-foreground hover:text-primary transition"
-                >
-                  Seguimiento
-                </Link>
-              </li>
             </ul>
           </div>
 

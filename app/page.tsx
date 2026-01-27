@@ -224,6 +224,48 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Tratamientos Específicos */}
+      <section className="container mx-auto py-8 px-4">
+        <h2 className="text-xl font-semibold mb-2 text-center">
+          Encuentra el tratamiento perfecto para ti
+        </h2>
+        <p className="text-sm text-muted-foreground text-center mb-6">
+          Soluciones especializadas para cada necesidad
+        </p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+          {[
+            { name: "Cabello Seco", href: "/productos?tratamiento=cabello-seco" },
+            { name: "Cabello Graso", href: "/productos?tratamiento=cabello-graso" },
+            { name: "Cabello Maltratado", href: "/productos?tratamiento=cabello-maltratado" },
+            { name: "Anti-Caspa", href: "/productos?tratamiento=anti-caspa" },
+            { name: "Kits Completos", href: "/productos?categoria=kits" },
+            { name: "Piel Grasa", href: "/productos?tratamiento=piel-grasa" },
+            { name: "Piel Seca", href: "/productos?tratamiento=piel-seca" },
+            { name: "Piel Normal/Mixta", href: "/productos?tratamiento=piel-normal-mixta" },
+            { name: "Anti-Edad", href: "/productos?tratamiento=anti-edad" },
+            { name: "Hidratación Profunda", href: "/productos?tratamiento=hidratacion" },
+          ].map((treatment) => (
+            <Link
+              key={treatment.name}
+              href={treatment.href}
+              className="group"
+            >
+              <Card className="shadow-none hover:shadow-md transition-shadow h-full">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full min-h-[100px] md:min-h-[120px]">
+                  <div className="size-10 md:size-12 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors flex items-center justify-center">
+                    <span className="text-xl md:text-2xl">✨</span>
+                  </div>
+                  <p className="text-xs md:text-sm font-semibold group-hover:text-primary transition-colors">
+                    {treatment.name}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Best Sellers */}
       <section className="container mx-auto py-8 px-4">
         <h2 className="text-xl font-semibold mb-6 text-center">Más Vendidos</h2>
