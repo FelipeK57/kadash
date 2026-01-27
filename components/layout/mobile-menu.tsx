@@ -10,8 +10,10 @@ import {
 import { Button } from "../ui/button";
 import { Menu, Dot } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export function MobileMenu() {
+  const [open, setOpen] = useState(false);
   const routes = [
     { name: "Kits", href: "/productos?categoria=kits" },
     { name: "Cuidado Corporal", href: "/productos?categoria=cuidado-corporal" },
@@ -46,7 +48,7 @@ export function MobileMenu() {
   ];
 
   return (
-    <Drawer direction="left">
+    <Drawer direction="left" open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button size="icon" variant="ghost">
           <Menu className="text-primary" />
@@ -59,7 +61,7 @@ export function MobileMenu() {
         <nav className="max-h-[calc(100vh-120px)] overflow-y-auto">
           {routes.map((route) => (
             <div key={route.name}>
-              <Link href={route.href}>
+              <Link href={route.href} onClick={() => setOpen(false)}>
                 <button className="w-full px-4 py-3 text-left text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
                   <Dot className="size-6 text-primary shrink-0" />
                   <span>{route.name}</span>
@@ -68,7 +70,7 @@ export function MobileMenu() {
               {route.subRoutes && (
                 <div>
                   {route.subRoutes.map((subRoute) => (
-                    <Link key={subRoute.name} href={subRoute.href}>
+                    <Link key={subRoute.name} href={subRoute.href} onClick={() => setOpen(false)}>
                       <button className="w-full px-4 py-2 pl-8 text-left text-sm hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2">
                         <Dot className="size-6 text-primary shrink-0" />
                         <span>{subRoute.name}</span>

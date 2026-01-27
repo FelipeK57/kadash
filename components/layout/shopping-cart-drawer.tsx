@@ -34,6 +34,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 });
 
 export function ShoppingCartDrawer() {
+  const [open, setOpen] = useState(false);
   const [items, setItems] = useState<CartItem[]>([
     {
       id: "1",
@@ -90,7 +91,7 @@ export function ShoppingCartDrawer() {
   };
 
   return (
-    <Drawer direction="right">
+    <Drawer direction="right" open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button size="icon" variant="ghost">
           <ShoppingBag className="text-primary" />
@@ -218,7 +219,7 @@ export function ShoppingCartDrawer() {
         </div>
 
         <DrawerFooter className="gap-2 border-t border-border bg-background/60 sticky bottom-0 pt-3 pb-3">
-          <Link href="/carrito">
+          <Link href="/carrito" onClick={() => setOpen(false)}>
             <Button className="w-full">Ir a checkout</Button>
           </Link>
           <DrawerClose asChild>
