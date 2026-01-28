@@ -42,7 +42,7 @@ export function MobileMenu() {
     },
     // { name: "Blog", href: "/blog" },
     { name: "Diagnóstico Capilar", href: "/diagnostico-capilar" },
-    { name: "Mayoristas", href: "/mayoristas" },
+    // { name: "Mayoristas", href: "/mayoristas" },
     { name: "Punto de Venta", href: "/puntos-de-venta" },
     { name: "Testimonios", href: "/testimonios" },
   ];

@@ -62,12 +62,12 @@ export default function FavoritesPage() {
         {hasFavorites ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {favoriteProducts.map((product) => (
-              <Card key={product.id} className="shadow-none hover:shadow-md transition-shadow group relative">
+              <Card key={product.id} className="shadow-none hover:shadow-md transition-shadow relative">
                 {/* Remove button */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 z-10 size-8 bg-background/80 hover:bg-background opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 z-10 size-8 bg-background/80 hover:bg-background"
                 >
                   <X className="size-4" />
                 </Button>

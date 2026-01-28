@@ -153,7 +153,7 @@ export default function CartPage() {
 
         {/* Resumen del pedido */}
         <div className="w-full lg:w-96 shrink-0">
-          <Card className="lg:sticky lg:top-36 shadow-none">
+          <Card className="lg:sticky lg:top-28 shadow-none">
             <CardHeader>
               <CardTitle>Resumen del Pedido</CardTitle>
             </CardHeader>

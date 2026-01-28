@@ -7,6 +7,7 @@ import {
   YoutubeIcon,
 } from "../icons/social-media";
 import { MercadoPagoIcon, VisaIcon } from "../icons/payment-methods";
+import { PrivacyPolicyModal } from "../privacy-policy-modal";
 
 export const Footer = () => {
   const socialMediaLinks = [
@@ -127,6 +128,9 @@ export const Footer = () => {
                 >
                   Preguntas frecuentes
                 </Link>
+              </li>
+              <li>
+                <PrivacyPolicyModal />
               </li>
             </ul>
           </div>

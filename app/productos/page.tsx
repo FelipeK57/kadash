@@ -157,7 +157,7 @@ export default function ProductsPage() {
         </Sheet>
 
         {/* Sidebar Filtros (Desktop/Tablet) */}
-        <aside className="hidden md:block w-full md:w-64 md:sticky md:top-36 md:self-start">
+        <aside className="hidden md:block w-full md:w-64 md:sticky md:top-28 md:self-start">
           <FiltersContent />
         </aside>
 
@@ -170,7 +170,7 @@ export default function ProductsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
             {currentProducts.map((product) => (
               <Card key={product.id} className="shadow-none gap-2">
                 <CardHeader>

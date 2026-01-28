@@ -85,6 +85,16 @@ export default function Home() {
       calification: 4.6,
       reviews: 110,
     },
+    {
+      id: 5,
+      name: "Mascarilla Reparadora",
+      image: "/product.jpeg",
+      price: 38000,
+      originalPrice: 55000,
+      discount: 31,
+      calification: 4.7,
+      reviews: 256,
+    }
   ];
 
   const bestSellers = [
@@ -132,6 +142,14 @@ export default function Home() {
       rating: 4.8,
       reviews: 215,
     },
+    {
+      id: 9,
+      name: "Exfoliante Corporal Suave",
+      image: "/product.jpeg",
+      price: 36000,
+      originalPrice: 52000,
+      discount: 31,
+    }
   ];
 
   return (
@@ -149,7 +167,7 @@ export default function Home() {
           Explora nuestras categorías
         </h2>
         <div className="overflow-x-auto md:overflow-x-visible">
-          <div className="flex gap-8 pb-2 md:justify-center min-w-max md:min-w-0">
+          <div className="flex gap-8 md:gap-12 pb-2 md:justify-center min-w-max md:min-w-0">
             {categories.map((category) => (
               <Link
                 key={category.name}
@@ -159,11 +177,11 @@ export default function Home() {
                 <Image
                   src={category.image}
                   alt={category.name}
-                  width={128}
-                  height={128}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-primary/20 group-hover:border-primary transition-colors"
+                  width={192}
+                  height={192}
+                  className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-primary/20 group-hover:border-primary transition-colors"
                 />
-                <span className="text-sm font-semibold text-center max-w-32 group-hover:text-primary transition-colors">
+                <span className="text-sm md:text-base font-semibold text-center max-w-32 md:max-w-48 group-hover:text-primary transition-colors">
                   {category.name}
                 </span>
               </Link>
@@ -177,7 +195,7 @@ export default function Home() {
         <h2 className="text-xl font-semibold mb-6 text-center">
           Ofertas Destacadas
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {products.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
               <CardHeader>
@@ -235,16 +253,16 @@ export default function Home() {
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {[
-            { name: "Cabello Seco", href: "/productos?tratamiento=cabello-seco" },
-            { name: "Cabello Graso", href: "/productos?tratamiento=cabello-graso" },
-            { name: "Cabello Maltratado", href: "/productos?tratamiento=cabello-maltratado" },
-            { name: "Anti-Caspa", href: "/productos?tratamiento=anti-caspa" },
-            { name: "Kits Completos", href: "/productos?categoria=kits" },
-            { name: "Piel Grasa", href: "/productos?tratamiento=piel-grasa" },
-            { name: "Piel Seca", href: "/productos?tratamiento=piel-seca" },
-            { name: "Piel Normal/Mixta", href: "/productos?tratamiento=piel-normal-mixta" },
-            { name: "Anti-Edad", href: "/productos?tratamiento=anti-edad" },
-            { name: "Hidratación Profunda", href: "/productos?tratamiento=hidratacion" },
+            { name: "Cabello Seco", href: "/productos?tratamiento=cabello-seco", seed: "CabelloSeco" },
+            { name: "Cabello Graso", href: "/productos?tratamiento=cabello-graso", seed: "CabelloGraso" },
+            { name: "Cabello Maltratado", href: "/productos?tratamiento=cabello-maltratado", seed: "CabelloMaltratado" },
+            { name: "Anti-Caspa", href: "/productos?tratamiento=anti-caspa", seed: "AntiCaspa" },
+            { name: "Kits Completos", href: "/productos?categoria=kits", seed: "KitsCompletos" },
+            { name: "Piel Grasa", href: "/productos?tratamiento=piel-grasa", seed: "PielGrasa" },
+            { name: "Piel Seca", href: "/productos?tratamiento=piel-seca", seed: "PielSeca" },
+            { name: "Piel Normal/Mixta", href: "/productos?tratamiento=piel-normal-mixta", seed: "PielMixta" },
+            { name: "Anti-Edad", href: "/productos?tratamiento=anti-edad", seed: "AntiEdad" },
+            { name: "Hidratación Profunda", href: "/productos?tratamiento=hidratacion", seed: "Hidratacion" },
           ].map((treatment) => (
             <Link
               key={treatment.name}
@@ -252,10 +270,12 @@ export default function Home() {
               className="group"
             >
               <Card className="shadow-none hover:shadow-md transition-shadow h-full">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full min-h-[100px] md:min-h-[120px]">
-                  <div className="size-10 md:size-12 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors flex items-center justify-center">
-                    <span className="text-xl md:text-2xl">✨</span>
-                  </div>
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-3 h-full min-h-[100px] md:min-h-[120px]">
+                  <img
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${treatment.seed}`}
+                    alt={treatment.name}
+                    className="w-12 h-12 rounded-full"
+                  />
                   <p className="text-xs md:text-sm font-semibold group-hover:text-primary transition-colors">
                     {treatment.name}
                   </p>
@@ -269,7 +289,7 @@ export default function Home() {
       {/* Best Sellers */}
       <section className="container mx-auto py-8 px-4">
         <h2 className="text-xl font-semibold mb-6 text-center">Más Vendidos</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {bestSellers.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
               <CardHeader>
