@@ -62,7 +62,7 @@ export default function FavoritesPage() {
         {hasFavorites ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {favoriteProducts.map((product) => (
-              <Card key={product.id} className="shadow-none hover:shadow-md transition-shadow relative">
+              <Card key={product.id} className="flex flex-col h-full shadow-none hover:shadow-md transition-shadow relative gap-2">
                 {/* Remove button */}
                 <Button
                   variant="ghost"
@@ -72,7 +72,7 @@ export default function FavoritesPage() {
                   <X className="size-4" />
                 </Button>
 
-                <CardHeader>
+                <CardHeader className="flex flex-col gap-2">
                   <Link href={`/productos/${slugify(product.name)}`}>
                     <div className="relative">
                       <Image
@@ -91,14 +91,19 @@ export default function FavoritesPage() {
                       )}
                     </div>
                   </Link>
-                  <Link
-                    href={`/productos/${slugify(product.name)}`}
-                    className="hover:text-primary"
-                  >
-                    <h3 className="font-semibold text-lg line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </Link>
+                  <div className="flex justify-between items-start md:items-center gap-2 w-full">
+                    <Link
+                      href={`/productos/${slugify(product.name)}`}
+                      className="hover:text-primary"
+                    >
+                      <h3 className="font-semibold text-lg line-clamp-2 min-h-3">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <Button className="group" variant="ghost" size="icon-lg">
+                      <Heart className="size-6 text-primary group-hover:fill-primary" />
+                    </Button>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="space-y-2">
@@ -106,8 +111,8 @@ export default function FavoritesPage() {
                     <Star className="size-4 text-yellow-400 fill-yellow-400" />
                     {product.rating}/5 ({product.reviews})
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text line-through text-muted-foreground text-sm">
+                  <div className="flex flex-col md:flex-row md:items-center gap-2">
+                    <span className="text line-through text-muted-foreground">
                       ${product.originalPrice.toLocaleString("es-CO")}
                     </span>
                     <span className="font-bold text-xl text-primary">
@@ -116,7 +121,7 @@ export default function FavoritesPage() {
                   </div>
                 </CardContent>
 
-                <CardFooter>
+                <CardFooter className="mt-auto">
                   <Button
                     className="w-full gap-2"
                     disabled={!product.inStock}

@@ -170,10 +170,13 @@ export default function ProductsPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
             {currentProducts.map((product) => (
-              <Card key={product.id} className="shadow-none gap-2">
-                <CardHeader>
+              <Card
+                key={product.id}
+                className="flex flex-col h-full shadow-none gap-2"
+              >
+                <CardHeader className="flex flex-col gap-2">
                   <Link href={`/productos/${slugify(product.name)}`}>
                     <Image
                       src={product.image}
@@ -183,9 +186,9 @@ export default function ProductsPage() {
                       className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
                     />
                   </Link>
-                  <div className="flex justify-between items-center gap-2">
+                  <div className="flex justify-between items-start md:items-center gap-2 w-full">
                     <Link href={`/productos/${slugify(product.name)}`} className="hover:text-primary">
-                      <h3 className="font-semibold text-lg">{product.name}</h3>
+                      <h3 className="font-semibold text-lg line-clamp-2 min-h-3">{product.name}</h3>
                     </Link>
                     <Button className="group" variant="ghost" size="icon-lg">
                       <Heart className="size-6 text-primary group-hover:fill-primary" />
@@ -197,7 +200,7 @@ export default function ProductsPage() {
                     <Star className="size-4 text-yellow-400 fill-yellow-400" />
                     {product.rating}/5 ({product.reviews})
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col md:flex-row md:items-center gap-2">
                     <span className="text line-through text-muted-foreground">
                       ${product.originalPrice.toLocaleString()}
                     </span>
@@ -206,8 +209,8 @@ export default function ProductsPage() {
                     </span>
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button className="w-full gap-2 mt-auto">
+                <CardFooter className="mt-auto">
+                  <Button className="w-full gap-2">
                     <ShoppingBag className="size-4" />
                     Agregar
                   </Button>

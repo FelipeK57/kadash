@@ -8,7 +8,16 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Heart, ShoppingBag, Star, Truck, CreditCard, Package, AlertCircle, Mail } from "lucide-react";
+import {
+  Heart,
+  ShoppingBag,
+  Star,
+  Truck,
+  CreditCard,
+  Package,
+  AlertCircle,
+  Mail,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function Home() {
@@ -94,7 +103,7 @@ export default function Home() {
       discount: 31,
       calification: 4.7,
       reviews: 256,
-    }
+    },
   ];
 
   const bestSellers = [
@@ -149,7 +158,7 @@ export default function Home() {
       price: 36000,
       originalPrice: 52000,
       discount: 31,
-    }
+    },
   ];
 
   return (
@@ -195,10 +204,13 @@ export default function Home() {
         <h2 className="text-xl font-semibold mb-6 text-center">
           Ofertas Destacadas
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {products.map((product) => (
-            <Card key={product.id} className="shadow-none gap-2">
-              <CardHeader>
+            <Card
+              key={product.id}
+              className="flex flex-col h-full shadow-none gap-2"
+            >
+              <CardHeader className="flex flex-col gap-2">
                 <Link href={`/productos/${slugify(product.name)}`}>
                   <Image
                     src={product.image}
@@ -208,9 +220,14 @@ export default function Home() {
                     className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
                   />
                 </Link>
-                <div className="flex justify-between items-center gap-2">
-                  <Link href={`/productos/${slugify(product.name)}`} className="hover:text-primary">
-                    <h3 className="font-semibold text-lg">{product.name}</h3>
+                <div className="flex justify-between items-start md:items-center gap-2 w-full">
+                  <Link
+                    href={`/productos/${slugify(product.name)}`}
+                    className="hover:text-primary"
+                  >
+                    <h3 className="font-semibold text-lg line-clamp-2 min-h-3">
+                      {product.name}
+                    </h3>
                   </Link>
                   <Button className="group" variant="ghost" size="icon-lg">
                     <Heart className="size-6 text-primary group-hover:fill-primary" />
@@ -222,7 +239,7 @@ export default function Home() {
                   <Star className="size-4 text-yellow-400 fill-yellow-400" />
                   {product.calification}/5 ({product.reviews})
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
                   <span className="text line-through text-muted-foreground">
                     ${product.originalPrice.toLocaleString()}
                   </span>
@@ -231,8 +248,8 @@ export default function Home() {
                   </span>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button className="w-full gap-2 mt-auto">
+              <CardFooter className="mt-auto">
+                <Button className="w-full gap-2">
                   <ShoppingBag className="size-4" />
                   Agregar
                 </Button>
@@ -250,27 +267,63 @@ export default function Home() {
         <p className="text-sm text-muted-foreground text-center mb-6">
           Soluciones especializadas para cada necesidad
         </p>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {[
-            { name: "Cabello Seco", href: "/productos?tratamiento=cabello-seco", seed: "CabelloSeco" },
-            { name: "Cabello Graso", href: "/productos?tratamiento=cabello-graso", seed: "CabelloGraso" },
-            { name: "Cabello Maltratado", href: "/productos?tratamiento=cabello-maltratado", seed: "CabelloMaltratado" },
-            { name: "Anti-Caspa", href: "/productos?tratamiento=anti-caspa", seed: "AntiCaspa" },
-            { name: "Kits Completos", href: "/productos?categoria=kits", seed: "KitsCompletos" },
-            { name: "Piel Grasa", href: "/productos?tratamiento=piel-grasa", seed: "PielGrasa" },
-            { name: "Piel Seca", href: "/productos?tratamiento=piel-seca", seed: "PielSeca" },
-            { name: "Piel Normal/Mixta", href: "/productos?tratamiento=piel-normal-mixta", seed: "PielMixta" },
-            { name: "Anti-Edad", href: "/productos?tratamiento=anti-edad", seed: "AntiEdad" },
-            { name: "Hidratación Profunda", href: "/productos?tratamiento=hidratacion", seed: "Hidratacion" },
+            {
+              name: "Cabello Seco",
+              href: "/productos?tratamiento=cabello-seco",
+              seed: "CabelloSeco",
+            },
+            {
+              name: "Cabello Graso",
+              href: "/productos?tratamiento=cabello-graso",
+              seed: "CabelloGraso",
+            },
+            {
+              name: "Cabello Maltratado",
+              href: "/productos?tratamiento=cabello-maltratado",
+              seed: "CabelloMaltratado",
+            },
+            {
+              name: "Anti-Caspa",
+              href: "/productos?tratamiento=anti-caspa",
+              seed: "AntiCaspa",
+            },
+            {
+              name: "Kits Completos",
+              href: "/productos?categoria=kits",
+              seed: "KitsCompletos",
+            },
+            {
+              name: "Piel Grasa",
+              href: "/productos?tratamiento=piel-grasa",
+              seed: "PielGrasa",
+            },
+            {
+              name: "Piel Seca",
+              href: "/productos?tratamiento=piel-seca",
+              seed: "PielSeca",
+            },
+            {
+              name: "Piel Normal/Mixta",
+              href: "/productos?tratamiento=piel-normal-mixta",
+              seed: "PielMixta",
+            },
+            {
+              name: "Anti-Edad",
+              href: "/productos?tratamiento=anti-edad",
+              seed: "AntiEdad",
+            },
+            {
+              name: "Hidratación Profunda",
+              href: "/productos?tratamiento=hidratacion",
+              seed: "Hidratacion",
+            },
           ].map((treatment) => (
-            <Link
-              key={treatment.name}
-              href={treatment.href}
-              className="group"
-            >
+            <Link key={treatment.name} href={treatment.href} className="group">
               <Card className="shadow-none hover:shadow-md transition-shadow h-full">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-3 h-full min-h-[100px] md:min-h-[120px]">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-3 h-full min-h-25 md:min-h-30">
                   <img
                     src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${treatment.seed}`}
                     alt={treatment.name}
@@ -289,7 +342,7 @@ export default function Home() {
       {/* Best Sellers */}
       <section className="container mx-auto py-8 px-4">
         <h2 className="text-xl font-semibold mb-6 text-center">Más Vendidos</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {bestSellers.map((product) => (
             <Card key={product.id} className="shadow-none gap-2">
               <CardHeader>
@@ -302,8 +355,11 @@ export default function Home() {
                     className="w-full aspect-square object-cover hover:scale-105 transition-transform z-0"
                   />
                 </Link>
-                <div className="flex justify-between items-center gap-2">
-                  <Link href={`/productos/${slugify(product.name)}`} className="hover:text-primary">
+                <div className="flex justify-between items-start gap-2">
+                  <Link
+                    href={`/productos/${slugify(product.name)}`}
+                    className="hover:text-primary"
+                  >
                     <h3 className="font-semibold text-lg">{product.name}</h3>
                   </Link>
                   <Button className="group" variant="ghost" size="icon-lg">
@@ -316,7 +372,7 @@ export default function Home() {
                   <Star className="size-4 text-yellow-400 fill-yellow-400" />
                   {product.rating}/5 ({product.reviews})
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
                   <span className="text line-through text-muted-foreground">
                     ${product.originalPrice.toLocaleString()}
                   </span>
@@ -380,7 +436,9 @@ export default function Home() {
               Suscríbete a nuestro newsletter
             </h2>
             <p className="mx-auto mb-8 max-w-2xl text-muted-foreground md:text-lg">
-              Mantente actualizado con nuestras ofertas exclusivas, lanzamientos de nuevos productos y descuentos especiales. ¡Suscríbete y sé el primero en enterarte!
+              Mantente actualizado con nuestras ofertas exclusivas, lanzamientos
+              de nuevos productos y descuentos especiales. ¡Suscríbete y sé el
+              primero en enterarte!
             </p>
             <form className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 mx-auto max-w-md">
