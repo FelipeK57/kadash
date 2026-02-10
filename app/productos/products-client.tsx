@@ -1,12 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,50 +26,80 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Filter, Heart, ShoppingBag, Star, X } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { slugify } from "@/lib/utils";
-import { useState } from "react";
+import { Filter } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Product } from "./types";
+import { Category, Product } from "./types";
 import ProductCard from "./components/ProductCard";
 
 type Props = {
   products: Product[];
+  categories: Category[];
 };
 
-export default function ProductsClient({ products }: Props) {
+export default function ProductsClient({ products, categories }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const selectedCategories = useMemo(() => {
+    const categoryParam = searchParams.get("category");
+    return categoryParam ? categoryParam.split(",") : [];
+  }, [searchParams]);
 
-  const categories = [
-    { id: "kits", label: "Kits" },
-    { id: "corporal", label: "Cuidado Corporal" },
-    { id: "cabello", label: "Cuidado del Cabello" },
-    { id: "skincare", label: "Skincare" },
-    { id: "complementos", label: "Complementos" },
-  ];
+  const sortValue = searchParams.get("sort") ?? "nuevo";
 
-  const priceRanges = [
-    { id: "0-25", label: "Menos de $25.000" },
-    { id: "25-50", label: "$25.000 - $50.000" },
-    { id: "50-100", label: "$50.000 - $100.000" },
-    { id: "100+", label: "Más de $100.000" },
-  ];
+  const updateQueryParam = (
+    key: string,
+    value: string,
+    options?: { multi?: boolean },
+  ) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (options?.multi) {
+      const current = params.get(key)?.split(",").filter(Boolean) ?? [];
+      const next = current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+
+      if (next.length > 0) {
+        params.set(key, next.join(","));
+      } else {
+        params.delete(key);
+      }
+    } else if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+
+    // Navegar a la nueva URL con los parámetros actualizados
+    router.push(`/productos?${params.toString()}`);
+    router.refresh();
+  };
+
+  const clearFilters = () => {
+    router.push(`/productos`);
+    router.refresh();
+  }
 
   const FiltersContent = () => (
     <div className="space-y-6">
       <div>
         <h3 className="font-semibold mb-3">Ordenar por</h3>
-        <Select defaultValue="relevance">
-          <SelectTrigger>
+        <Select
+          value={sortValue}
+          onValueChange={(value) => updateQueryParam("sort", value)}
+        >
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Seleccionar" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="relevance">Relevancia</SelectItem>
-            <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
-            <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
-            <SelectItem value="rating">Mejor Valorados</SelectItem>
+            {/* <SelectItem value="relevance">Relevancia</SelectItem> */}
+            <SelectItem value="nuevo">Nuevo</SelectItem>
+            <SelectItem value="menor_precio">Precio: Menor a Mayor</SelectItem>
+            <SelectItem value="mayor_precio">Precio: Mayor a Menor</SelectItem>
+            {/* <SelectItem value="rating">Mejor Valorados</SelectItem> */}
           </SelectContent>
         </Select>
       </div>
@@ -85,36 +109,25 @@ export default function ProductsClient({ products }: Props) {
         <div className="space-y-2">
           {categories.map((category) => (
             <div key={category.id} className="flex items-center space-x-2">
-              <Checkbox id={category.id} />
+              <Checkbox
+                id={String(category.id)}
+                checked={selectedCategories.includes(category.name)}
+                onCheckedChange={() =>
+                  updateQueryParam("category", category.name, { multi: true })
+                }
+              />
               <Label
-                htmlFor={category.id}
+                htmlFor={String(category.id)}
                 className="text-sm font-normal cursor-pointer"
               >
-                {category.label}
+                {category.name}
               </Label>
             </div>
           ))}
         </div>
       </div>
 
-      <div>
-        <h3 className="font-semibold mb-3">Rango de Precio</h3>
-        <div className="space-y-2">
-          {priceRanges.map((range) => (
-            <div key={range.id} className="flex items-center space-x-2">
-              <Checkbox id={range.id} />
-              <Label
-                htmlFor={range.id}
-                className="text-sm font-normal cursor-pointer"
-              >
-                {range.label}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Button variant="outline" className="w-full">
+      <Button onClick={clearFilters} variant="outline" className="w-full">
         Limpiar Filtros
       </Button>
     </div>
@@ -162,62 +175,6 @@ export default function ProductsClient({ products }: Props) {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          {/* 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(1, prev - 1))
-                  }
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(
-                  (page) =>
-                    page === 1 ||
-                    page === totalPages ||
-                    Math.abs(page - currentPage) <= 1,
-                )
-                .map((page, index, array) => (
-                  <div key={page} className="flex items-center">
-                    {index > 0 && array[index - 1] !== page - 1 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  </div>
-                ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination> */}
         </div>
       </div>
     </main>

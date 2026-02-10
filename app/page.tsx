@@ -25,22 +25,22 @@ export default function Home() {
     {
       name: "Capilar",
       image: "/categories/capilar.jpeg",
-      href: "/productos?categoria=capilar",
+      href: "/productos?category=Capilar",
     },
     {
       name: "Corporal",
       image: "/categories/corporal.jpeg",
-      href: "/productos?categoria=cuidado-corporal",
+      href: "/productos?category=Corporal",
     },
     {
       name: "Nutrición",
       image: "/categories/nutricion.jpeg",
-      href: "/productos?categoria=nutricion",
+      href: "/productos?category=Nutrición",
     },
     {
       name: "Facial",
       image: "/categories/facial.jpeg",
-      href: "/productos?categoria=facial",
+      href: "/productos?category=Facial",
     },
   ];
 

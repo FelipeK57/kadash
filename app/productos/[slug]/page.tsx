@@ -9,7 +9,5 @@ export default async function ProductsPage({
   const { slug } = await params;
 
   const product = await getProductBySlug(slug);
-  console.log("Fetched product:", product);
-
   return <ProductClient product={product} />;
 }

@@ -4,23 +4,38 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heart, ShoppingBag, Star, Truck, ShieldCheck } from "lucide-react";
 import Image from "next/image";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Product } from "../types";
-import { Select, SelectItem } from "@/components/ui/select";
 
 type Props = {
   product: Product;
 };
 
 export default function ProductClient({ product }: Props) {
-  // Datos determinísticos para evitar errores de hidratación
+  // Estado para la variante seleccionada
+  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [quantity, setQuantity] = useState(1);
+
   const name = product.name;
-  const price = product.variants[0].price;
   const description = product.description;
   const rating = 4.6;
   const reviewsCount = 128;
 
-  const [qty, setQty] = useState(product.variants[0].stock > 0 ? 1 : 0);
+  const handleAddToCart = () => {
+    console.log("Agregando al carrito:", {
+      productId: product.id,
+      variantId: selectedVariant.id,
+      size: selectedVariant.size,
+      price: selectedVariant.price,
+      quantity,
+    });
+    // Aquí integrarás tu servicio de carrito
+  };
+
+  const handleAddToFavorites = () => {
+    console.log("Agregando a favoritos:", product.id);
+    // Aquí integrarás tu servicio de favoritos
+  };
 
   const reviews = [
     {
@@ -51,11 +66,12 @@ export default function ProductClient({ product }: Props) {
           {/* Imagen principal */}
           <div className="shrink-0 max-w-md md:max-w-lg mx-auto">
             <Image
-              src={product.variants[0].imageUrl}
+              src={selectedVariant.imageUrl}
               alt={name}
               width={500}
               height={500}
               className="w-full aspect-square object-cover rounded-lg z-0"
+              key={selectedVariant.id}
             />
           </div>
 
@@ -65,7 +81,7 @@ export default function ProductClient({ product }: Props) {
 
             <div className="mt-4 sm:items-center sm:gap-4 sm:flex">
               <p className="text-2xl font-extrabold text-primary sm:text-3xl">
-                ${price.toLocaleString("es-CO")}
+                ${selectedVariant.price.toLocaleString("es-CO")}
               </p>
 
               <div className="flex items-center gap-2 mt-2 sm:mt-0">
@@ -89,17 +105,22 @@ export default function ProductClient({ product }: Props) {
               </div>
             </div>
 
-            {/* Controles de compra */}
-            <div className="mt-6 flex flex-col gap-3 sm:mt-8 lg:flex-row lg:gap-4 lg:items-center">
-              <Button variant="outline" className="w-full lg:w-auto gap-2">
-                <Heart className="size-5" />
-                Agregar a favoritos
-              </Button>
-
-              <Button className="w-full lg:w-auto gap-2">
-                <ShoppingBag className="size-5" />
-                Agregar al carrito
-              </Button>
+            {/* Stock disponible */}
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">
+                Stock disponible:{" "}
+                <span
+                  className={`font-semibold ${
+                    selectedVariant.stock > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {selectedVariant.stock > 0
+                    ? `${selectedVariant.stock} unidades`
+                    : "Sin stock"}
+                </span>
+              </p>
             </div>
 
             <Separator className="my-6 md:my-8" />
@@ -107,15 +128,93 @@ export default function ProductClient({ product }: Props) {
             {/* Variantes */}
             <div className="flex flex-col gap-4">
               <label htmlFor="variant" className="text-sm font-medium">
-                Variantes:
+                Tallas disponibles:
               </label>
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-3 items-center flex-wrap">
                 {product.variants.map((variant) => (
-                  <div className="py-2 px-4 border rounded-md w-fit" key={variant.id}>
+                  <button
+                    key={variant.id}
+                    onClick={() => {
+                      setSelectedVariant(variant);
+                      setQuantity(1); // Resetear cantidad al cambiar variante
+                    }}
+                    disabled={variant.stock === 0}
+                    className={`
+                      py-2 px-4 border rounded-md min-w-15 text-center
+                      transition-all duration-200
+                      ${
+                        selectedVariant.id === variant.id
+                          ? "border-primary bg-primary text-primary-foreground font-semibold"
+                          : "border-border hover:border-primary"
+                      }
+                      ${
+                        variant.stock === 0
+                          ? "opacity-50 cursor-not-allowed line-through"
+                          : "cursor-pointer"
+                      }
+                    `}
+                  >
                     {variant.size}
-                  </div>
+                  </button>
                 ))}
               </div>
+            </div>
+
+            <Separator className="my-6 md:my-8" />
+
+            {/* Selector de cantidad */}
+            {selectedVariant.stock > 0 && (
+              <div className="flex items-center gap-4 mb-6">
+                <label className="text-sm font-medium">Cantidad:</label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </Button>
+                  <span className="w-12 text-center font-semibold">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      setQuantity(
+                        Math.min(selectedVariant.stock, quantity + 1)
+                      )
+                    }
+                    disabled={quantity >= selectedVariant.stock}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Controles de compra */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 sm:items-center">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto gap-2"
+                onClick={handleAddToFavorites}
+              >
+                <Heart className="size-5" />
+                Agregar a favoritos
+              </Button>
+
+              <Button
+                className="w-full sm:w-auto gap-2"
+                onClick={handleAddToCart}
+                disabled={selectedVariant.stock === 0}
+              >
+                <ShoppingBag className="size-5" />
+                {selectedVariant.stock === 0
+                  ? "Sin stock"
+                  : "Agregar al carrito"}
+              </Button>
             </div>
 
             <p className="mt-6 text-muted-foreground">{description}</p>
