@@ -64,7 +64,7 @@ export default function ProductClient({ product }: Props) {
       <div className="max-w-7xl px-4 mx-auto w-full">
         <div className="md:grid md:grid-cols-2 md:gap-8 xl:gap-12">
           {/* Imagen principal */}
-          <div className="shrink-0 max-w-md md:max-w-lg mx-auto">
+          <div className="shrink-0 max-w-sm lg:max-w-full">
             <Image
               src={selectedVariant.imageUrl}
               alt={name}
@@ -79,7 +79,7 @@ export default function ProductClient({ product }: Props) {
           <div className="mt-6 sm:mt-8 md:mt-0">
             <h1 className="text-xl font-semibold sm:text-2xl">{name}</h1>
 
-            <div className="mt-4 sm:items-center sm:gap-4 sm:flex">
+            <div className="flex flex-col gap-4 mt-4 ">
               <p className="text-2xl font-extrabold text-primary sm:text-3xl">
                 ${selectedVariant.price.toLocaleString("es-CO")}
               </p>
@@ -128,7 +128,7 @@ export default function ProductClient({ product }: Props) {
             {/* Variantes */}
             <div className="flex flex-col gap-4">
               <label htmlFor="variant" className="text-sm font-medium">
-                Tallas disponibles:
+                Variantes disponibles:
               </label>
               <div className="flex gap-3 items-center flex-wrap">
                 {product.variants.map((variant) => (
@@ -195,10 +195,10 @@ export default function ProductClient({ product }: Props) {
             )}
 
             {/* Controles de compra */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 sm:items-center">
+            <div className="flex flex-col gap-3 lg:flex-row sm:gap-4 sm:items-center">
               <Button
                 variant="outline"
-                className="w-full sm:w-auto gap-2"
+                className="w-full lg:w-auto gap-2"
                 onClick={handleAddToFavorites}
               >
                 <Heart className="size-5" />
@@ -206,7 +206,7 @@ export default function ProductClient({ product }: Props) {
               </Button>
 
               <Button
-                className="w-full sm:w-auto gap-2"
+                className="w-full lg:w-auto gap-2"
                 onClick={handleAddToCart}
                 disabled={selectedVariant.stock === 0}
               >
