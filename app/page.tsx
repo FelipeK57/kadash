@@ -23,29 +23,24 @@ import { Input } from "@/components/ui/input";
 export default function Home() {
   const categories = [
     {
-      name: "Kits",
-      image: "/category.webp",
-      href: "/productos?categoria=kits",
+      name: "Capilar",
+      image: "/categories/capilar.jpeg",
+      href: "/productos?categoria=capilar",
     },
     {
-      name: "Cuidado Corporal",
-      image: "/category.webp",
+      name: "Corporal",
+      image: "/categories/corporal.jpeg",
       href: "/productos?categoria=cuidado-corporal",
     },
     {
-      name: "Cuidado del Cabello",
-      image: "/category.webp",
-      href: "/productos?categoria=cuidado-cabello",
+      name: "Nutrición",
+      image: "/categories/nutricion.jpeg",
+      href: "/productos?categoria=nutricion",
     },
     {
-      name: "Skincare",
-      image: "/category.webp",
-      href: "/productos?categoria=skincare",
-    },
-    {
-      name: "Complementos",
-      image: "/category.webp",
-      href: "/productos?categoria=complementos",
+      name: "Facial",
+      image: "/categories/facial.jpeg",
+      href: "/productos?categoria=facial",
     },
   ];
 
@@ -164,7 +159,7 @@ export default function Home() {
   return (
     <main className="flex flex-col">
       <Image
-        src="/hero.webp"
+        src="/banner.jpeg"
         alt="Hero Image"
         width={1920}
         height={600}
@@ -229,9 +224,9 @@ export default function Home() {
                       {product.name}
                     </h3>
                   </Link>
-                  <Button className="group" variant="ghost" size="icon-lg">
+                  {/* <Button className="group" variant="ghost" size="icon-lg">
                     <Heart className="size-6 text-primary group-hover:fill-primary" />
-                  </Button>
+                  </Button> */}
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">

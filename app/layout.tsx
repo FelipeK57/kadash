@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/icons/social-media";
 import ScrollToTop from "@/components/scroll-to-top";
 // Supports weights 100-900
-import '@fontsource-variable/montserrat';
+import "@fontsource-variable/montserrat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   title: "Kadash",
   description: "Tienda online de productos de belleza y cuidado personal.",
 };
+
+import { QueryProvider } from "./providers/query-provider";
 
 export default function RootLayout({
   children,
@@ -40,16 +42,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen relative`}
       >
-        <ScrollToTop />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Button
-          size="icon"
-          className="size-16 bottom-5 right-5 rounded-full bg-emerald-600 p-3 fixed shadow-full z-50"
-        >
-          <WhatsAppIcon />
-        </Button>
+        <QueryProvider>
+          <ScrollToTop />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Button
+            size="icon"
+            className="size-16 bottom-5 right-5 rounded-full bg-emerald-600 p-3 fixed shadow-full z-50"
+          >
+            <WhatsAppIcon />
+          </Button>
+        </QueryProvider>
       </body>
     </html>
   );
