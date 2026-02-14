@@ -8,19 +8,22 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { loginService } from "./services/login.service";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const { login } = useAuthStore();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = { email: "", password: "" };
 
@@ -39,13 +42,18 @@ export default function LoginPage() {
     setErrors(newErrors);
 
     if (!newErrors.email && !newErrors.password) {
-      console.log("Login attempt:", { email, password, rememberMe });
-      // Aquí iría la lógica de autenticación
+      try {
+        const response = await loginService({ email, password });
+        login(response.token);
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
+    <main className="bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back button */}
         <Link
@@ -155,7 +163,10 @@ export default function LoginPage() {
                 <span className="text-muted-foreground">
                   ¿No tienes una cuenta?{" "}
                 </span>
-                <Link href="/auth/register" className="text-primary hover:underline font-semibold">
+                <Link
+                  href="/auth/register"
+                  className="text-primary hover:underline font-semibold"
+                >
                   Regístrate aquí
                 </Link>
               </div>

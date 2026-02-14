@@ -8,10 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, User, Phone, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { registerService } from "./services/register.service";
+import { RegisterDto } from "./dtos";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     name: "",
+    nuip: "",
     email: "",
     phone: "",
     password: "",
@@ -20,6 +23,7 @@ export default function RegisterPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState({
     name: "",
+    nuip: "",
     email: "",
     phone: "",
     password: "",
@@ -37,10 +41,11 @@ export default function RegisterPage() {
     return phoneRegex.test(phone.replace(/\s/g, ""));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = {
       name: "",
+      nuip: "",
       email: "",
       phone: "",
       password: "",
@@ -53,6 +58,13 @@ export default function RegisterPage() {
       newErrors.name = "El nombre es requerido";
     } else if (formData.name.length < 3) {
       newErrors.name = "El nombre debe tener al menos 3 caracteres";
+    }
+
+    if (!formData.nuip) {
+      newErrors.nuip = "El número de identificación es requerido";
+    } else if (formData.nuip.length < 10) {
+      newErrors.nuip =
+        "El número de identificación debe tener al menos 10 caracteres";
     }
 
     if (!formData.email) {
@@ -87,8 +99,20 @@ export default function RegisterPage() {
 
     const hasErrors = Object.values(newErrors).some((error) => error !== "");
     if (!hasErrors) {
-      console.log("Register attempt:", formData);
+      const data: RegisterDto = {
+        name: formData.name,
+        email: formData.email,
+        nuip: formData.nuip,
+        phone: formData.phone,
+        password: formData.password,
+      };
       // Aquí iría la lógica de registro
+      try {
+        const response = await registerService(data);
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -97,7 +121,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4 py-8">
+    <main className="bg-background flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         {/* Back button */}
         <Link
@@ -137,6 +161,26 @@ export default function RegisterPage() {
                 </div>
                 {errors.name && (
                   <p className="text-sm text-destructive">{errors.name}</p>
+                )}
+              </div>
+
+              {/* Nuip */}
+              <div className="space-y-2">
+                <Label htmlFor="nuip">Número de Identificación</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    id="nuip"
+                    type="text"
+                    placeholder="1234567890"
+                    className="pl-10"
+                    value={formData.nuip}
+                    onChange={(e) => handleInputChange("nuip", e.target.value)}
+                    aria-invalid={!!errors.nuip}
+                  />
+                </div>
+                {errors.nuip && (
+                  <p className="text-sm text-destructive">{errors.nuip}</p>
                 )}
               </div>
 
@@ -228,7 +272,7 @@ export default function RegisterPage() {
 
               {/* Terms */}
               <div className="space-y-2">
-                <div className="flex items-start gap-2">
+                <div className="flex items-center gap-2">
                   <Checkbox
                     id="terms"
                     checked={acceptTerms}
@@ -239,22 +283,9 @@ export default function RegisterPage() {
                   />
                   <Label
                     htmlFor="terms"
-                    className="text-sm font-normal cursor-pointer leading-relaxed"
+                    className="text-sm font-normal cursor-pointer"
                   >
-                    Acepto los{" "}
-                    <Link
-                      href="/terminos"
-                      className="text-primary hover:underline"
-                    >
-                      Términos y Condiciones
-                    </Link>{" "}
-                    y la{" "}
-                    <Link
-                      href="/politicas"
-                      className="text-primary hover:underline"
-                    >
-                      Política de Privacidad
-                    </Link>
+                    Acepto los Términos y Condiciones
                   </Label>
                 </div>
                 {errors.terms && (
