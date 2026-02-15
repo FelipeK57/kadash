@@ -10,6 +10,7 @@ import { Mail, Lock, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { loginService } from "./services/login.service";
 import { useAuthStore } from "@/store/auth-store";
+import router from "next/router";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -45,7 +46,6 @@ export default function LoginPage() {
       try {
         const response = await loginService({ email, password });
         login(response.token);
-        console.log(response);
       } catch (error) {
         console.error(error);
       }

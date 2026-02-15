@@ -6,15 +6,28 @@ import { Heart, ShoppingBag, Star, Truck, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Product } from "../types";
+import { useShoppingCartStore } from "@/store/shopping-cart-store";
+import { toast } from "sonner";
+import {
+  useIsFavorite,
+  useAddFavorite,
+  useRemoveFavorite,
+} from "@/app/favoritos/hooks/use-favorites";
+import { useAuthStore } from "@/store/auth-store";
+import { cn } from "@/lib/utils";
 
 type Props = {
   product: Product;
 };
 
 export default function ProductClient({ product }: Props) {
-  // Estado para la variante seleccionada
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
   const [quantity, setQuantity] = useState(1);
+  const addItem = useShoppingCartStore((state) => state.addItem);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isFavorited = useIsFavorite(product.id);
+  const addFavorite = useAddFavorite();
+  const removeFavorite = useRemoveFavorite();
 
   const name = product.name;
   const description = product.description;
@@ -22,19 +35,36 @@ export default function ProductClient({ product }: Props) {
   const reviewsCount = 128;
 
   const handleAddToCart = () => {
-    console.log("Agregando al carrito:", {
-      productId: product.id,
-      variantId: selectedVariant.id,
-      size: selectedVariant.size,
-      price: selectedVariant.price,
-      quantity,
-    });
-    // Aquí integrarás tu servicio de carrito
+    if (!selectedVariant?.id || !product.id) return;
+    addItem(
+      {
+        variantId: selectedVariant.id,
+        productId: product.id,
+        productName: product.name,
+        variantSize: selectedVariant.size,
+        price: selectedVariant.price,
+        imageUrl: selectedVariant.imageUrl || product.image,
+      },
+      quantity
+    );
+    toast.success(
+      quantity > 1
+        ? `${quantity} unidades de ${product.name} agregadas al carrito`
+        : `${product.name} agregado al carrito`
+    );
   };
 
-  const handleAddToFavorites = () => {
-    console.log("Agregando a favoritos:", product.id);
-    // Aquí integrarás tu servicio de favoritos
+  const handleFavorite = () => {
+    if (!isAuthenticated) {
+      toast.error("Inicia sesión para guardar favoritos");
+      return;
+    }
+    if (!product.id) return;
+    if (isFavorited) {
+      removeFavorite.mutate(product.id);
+    } else {
+      addFavorite.mutate(product.id);
+    }
   };
 
   const reviews = [
@@ -198,11 +228,20 @@ export default function ProductClient({ product }: Props) {
             <div className="flex flex-col gap-3 lg:flex-row sm:gap-4 sm:items-center">
               <Button
                 variant="outline"
-                className="w-full lg:w-auto gap-2"
-                onClick={handleAddToFavorites}
+                className={cn(
+                  "w-full lg:w-auto gap-2",
+                  isFavorited && "border-primary"
+                )}
+                onClick={handleFavorite}
+                disabled={addFavorite.isPending || removeFavorite.isPending}
               >
-                <Heart className="size-5" />
-                Agregar a favoritos
+                <Heart
+                  className={cn(
+                    "size-5",
+                    isFavorited && "fill-primary text-primary"
+                  )}
+                />
+                {isFavorited ? "En favoritos" : "Agregar a favoritos"}
               </Button>
 
               <Button

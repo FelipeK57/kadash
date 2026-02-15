@@ -6,12 +6,8 @@ import { Search, User } from "lucide-react";
 import { Input } from "../ui/input";
 import { MobileMenu } from "./mobile-menu";
 import { ShoppingCartDrawer } from "./shopping-cart-drawer";
-import { useAuthStore } from "@/store/auth-store";
 
 export const Header = () => {
-  const { isAuthenticated } = useAuthStore();
-  console.log({ isAuthenticated });
-
   return (
     <header className="sticky top-0 bg-background z-50 border-b border-border">
       {/* Banda de envío gratis - solo visible en desktop */}

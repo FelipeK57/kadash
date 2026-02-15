@@ -15,6 +15,8 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
+import { useAuthStore } from "@/store/auth-store";
+import router from "next/router";
 
 // Mock data - reemplazar con datos reales
 const userData = {
@@ -58,6 +60,9 @@ const quickStats = [
 ];
 
 export default function AccountPage() {
+
+  const { payload } = useAuthStore();
+
   return (
     <div className="space-y-6">
       {/* Profile Card */}
@@ -67,13 +72,13 @@ export default function AccountPage() {
             {/* User Info */}
             <div className="flex items-center gap-4">
               <img
-                src={userData.avatar}
-                alt={userData.name}
+                src={"https://api.dicebear.com/7.x/avataaars/svg?seed=Juan"}
+                alt={payload.name}
                 className="size-16 md:size-20 rounded-full bg-secondary"
               />
               <div>
                 <h3 className="text-lg md:text-xl font-bold">
-                  {userData.name}
+                  {payload?.name || "Usuario"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Miembro desde{" "}
@@ -84,15 +89,6 @@ export default function AccountPage() {
                 </p>
               </div>
             </div>
-
-            {/* Edit Button
-            <Button
-              variant="outline"
-              className="gap-2 self-start sm:self-auto"
-            >
-              <Edit className="size-4" />
-              Editar Perfil
-            </Button> */}
           </div>
         </CardContent>
       </Card>
@@ -107,7 +103,7 @@ export default function AccountPage() {
             <Mail className="size-5 text-muted-foreground shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">Correo Electrónico</p>
-              <p className="text-sm md:text-base break-all">{userData.email}</p>
+              <p className="text-sm md:text-base break-all">{payload?.email || "usuario@example.com"}</p>
             </div>
           </div>
 
@@ -115,7 +111,7 @@ export default function AccountPage() {
             <Phone className="size-5 text-muted-foreground shrink-0" />
             <div className="flex-1">
               <p className="text-xs text-muted-foreground">Teléfono</p>
-              <p className="text-sm md:text-base">{userData.phone}</p>
+              <p className="text-sm md:text-base">{payload?.phone || "N/A"}</p>
             </div>
           </div>
 
@@ -223,8 +219,7 @@ export default function AccountPage() {
         </CardContent>
       </Card>
 
-      {/* Preferences Card
-      <Card>
+      {/*<Card>
         <CardHeader>
           <CardTitle className="text-lg">Preferencias</CardTitle>
         </CardHeader>
@@ -238,13 +233,14 @@ export default function AccountPage() {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogout}
           >
             <LogOut className="size-4" />
             Cerrar Sesión
           </Button>
         </CardContent>
       </Card>
-       */}
+      */}
     </div>
   );
 }

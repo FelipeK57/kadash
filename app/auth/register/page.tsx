@@ -10,6 +10,7 @@ import { Mail, Lock, User, Phone, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { registerService } from "./services/register.service";
 import { RegisterDto } from "./dtos";
+import router from "next/router";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -109,7 +110,7 @@ export default function RegisterPage() {
       // Aquí iría la lógica de registro
       try {
         const response = await registerService(data);
-        console.log(response);
+        router.push("/auth/login");
       } catch (error) {
         console.error(error);
       }

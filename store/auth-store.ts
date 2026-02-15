@@ -28,6 +28,8 @@ interface AuthStore {
   token: string | null;
   isAuthenticated: boolean;
   payload: ClientTokenPayload;
+  hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -38,6 +40,11 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isAuthenticated: false,
       payload: payloadInitialState,
+      hasHydrated: false,
+
+      setHasHydrated: (state: boolean) => {
+        set({ hasHydrated: state });
+      },
 
       login: (token) => {
         try {
@@ -66,16 +73,20 @@ export const useAuthStore = create<AuthStore>()(
       name: "client-auth-storage",
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
-        if (state?.token) {
-          try {
-            const decoded = jwtDecode<ClientTokenPayload>(state.token);
-            if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+        if (state) {
+          state.setHasHydrated(true);
+
+          if (state?.token) {
+            try {
+              const decoded = jwtDecode<ClientTokenPayload>(state.token);
+              if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+                state.logout?.();
+              } else {
+                state.login?.(state.token);
+              }
+            } catch {
               state.logout?.();
-            } else {
-              state.login?.(state.token);
             }
-          } catch {
-            state.logout?.();
           }
         }
       },

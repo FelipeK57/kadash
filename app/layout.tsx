@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "./providers/query-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -43,6 +44,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen relative`}
       >
         <QueryProvider>
+          <Toaster richColors theme="light" position="top-center" />
           <ScrollToTop />
           <Header />
           <main className="flex-1">{children}</main>

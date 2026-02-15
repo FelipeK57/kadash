@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { User, Package, MapPin, LogOut, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 
 const menuItems = [
   {
@@ -25,6 +26,7 @@ export const AccountLayout = ({
   children: React.ReactNode;
 }>) => {
   const pathname = usePathname();
+  const { logout } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,6 +72,7 @@ export const AccountLayout = ({
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10"
+                onClick={logout}
               >
                 <LogOut className="size-4" />
                 <span className="flex-1 text-left">Cerrar Sesión</span>

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,12 +8,52 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { slugify } from "@/lib/utils";
 import { Heart, ShoppingBag } from "lucide-react";
 import { Product } from "../types";
 import Image from "next/image";
+import { useShoppingCartStore } from "@/store/shopping-cart-store";
+import { toast } from "sonner";
+import {
+  useIsFavorite,
+  useAddFavorite,
+  useRemoveFavorite,
+} from "@/app/favoritos/hooks/use-favorites";
+import { useAuthStore } from "@/store/auth-store";
+import { cn } from "@/lib/utils";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const addItem = useShoppingCartStore((state) => state.addItem);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isFavorited = useIsFavorite(product.id);
+  const addFavorite = useAddFavorite();
+  const removeFavorite = useRemoveFavorite();
+
+  const handleAddToCart = () => {
+    const variant = product.variants[0];
+    if (!variant?.id || !product.id) return;
+    addItem({
+      variantId: variant.id,
+      productId: product.id,
+      productName: product.name,
+      variantSize: variant.size,
+      price: variant.price,
+      imageUrl: variant.imageUrl || product.image,
+    });
+    toast.success(`${product.name} agregado al carrito`);
+  };
+
+  const handleFavorite = () => {
+    if (!isAuthenticated) {
+      toast.error("Inicia sesión para guardar favoritos");
+      return;
+    }
+    if (!product.id) return;
+    if (isFavorited) {
+      removeFavorite.mutate(product.id);
+    } else {
+      addFavorite.mutate(product.id);
+    }
+  };
   return (
     <Card key={product.id} className="flex flex-col h-full shadow-none gap-2">
       <CardHeader className="flex flex-col gap-2">
@@ -50,13 +92,20 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 mt-auto">
-        <Button className="w-full gap-2">
+        <Button className="w-full gap-2" onClick={handleAddToCart}>
           <ShoppingBag className="size-4" />
           Agregar
         </Button>
-        <Button variant={"outline"} className="w-full gap-2">
-          <Heart className="size-4" />
-          Favoritos
+        <Button
+          variant="outline"
+          className={cn("w-full gap-2", isFavorited && "border-primary")}
+          onClick={handleFavorite}
+          disabled={addFavorite.isPending || removeFavorite.isPending}
+        >
+          <Heart
+            className={cn("size-4", isFavorited && "fill-primary text-primary")}
+          />
+          {isFavorited ? "En favoritos" : "Favoritos"}
         </Button>
       </CardFooter>
     </Card>
