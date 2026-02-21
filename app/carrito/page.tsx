@@ -12,13 +12,21 @@ import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useShoppingCartStore,
   selectSubtotal,
 } from "@/store/shopping-cart-store";
+import { useAuthStore } from "@/store/auth-store";
+import { createCheckoutOrder } from "./services/checkout.service";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { ACCOUNT_QUERY_KEY } from "@/app/cuenta/hooks/use-account";
+import { useState } from "react";
 
 const FREE_SHIPPING_THRESHOLD = 50000;
 const SHIPPING_COST = 8000;
+const PAYMENT_METHOD_MOCK = "MERCADOPAGO";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -27,14 +35,56 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 });
 
 export default function CartPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
   const items = useShoppingCartStore((state) => state.items);
   const subtotal = useShoppingCartStore(selectSubtotal);
   const updateQuantity = useShoppingCartStore((state) => state.updateQuantity);
   const removeItem = useShoppingCartStore((state) => state.removeItem);
+  const clearCart = useShoppingCartStore((state) => state.clearCart);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const shippingCost =
     subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shippingCost;
+
+  const handleProceedToPayment = async () => {
+    if (!isAuthenticated) {
+      toast.error("Inicia sesión para proceder al pago");
+      router.push("/auth/login");
+      return;
+    }
+
+    setIsCheckoutLoading(true);
+    try {
+      const payload = {
+        items: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        total,
+        paymentMethod: PAYMENT_METHOD_MOCK,
+      };
+
+      await createCheckoutOrder(payload);
+      clearCart();
+      queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
+      toast.success("¡Orden creada exitosamente!");
+      router.push("/cuenta");
+    } catch (error: unknown) {
+      const msg =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : "Error al procesar el pago";
+      toast.error(msg || "Error al procesar el pago");
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -160,8 +210,13 @@ export default function CartPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
-              <Button className="w-full" size="lg">
-                Proceder al Pago
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleProceedToPayment}
+                disabled={isCheckoutLoading}
+              >
+                {isCheckoutLoading ? "Procesando..." : "Proceder al Pago"}
               </Button>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/productos">Continuar Comprando</Link>

@@ -10,9 +10,10 @@ import { Mail, Lock, User, Phone, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { registerService } from "./services/register.service";
 import { RegisterDto } from "./dtos";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     nuip: "",

@@ -12,20 +12,16 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  useShoppingCartStore,
+  selectSubtotal,
+} from "@/store/shopping-cart-store";
 
-type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-  variant?: string;
-};
-
-const FREE_SHIPPING_THRESHOLD = 50000; // Ajusta segun regla de negocio
+const FREE_SHIPPING_THRESHOLD = 50000;
+const SHIPPING_COST = 8000;
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -35,60 +31,19 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 
 export function ShoppingCartDrawer() {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "Kit reparación profunda",
-      variant: "Cabello seco",
-      price: 22500,
-      quantity: 1,
-      image: "/product.jpeg",
-    },
-    {
-      id: "2",
-      name: "Serum facial hidratante",
-      variant: "30 ml",
-      price: 45000,
-      quantity: 2,
-      image: "/product.jpeg",
-    },
-    {
-      id: "3",
-      name: "Champú nutritivo",
-      variant: "250 ml",
-      price: 18000,
-      quantity: 1,
-      image: "/product.jpeg",
-    },
-  ]);
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    [items],
-  );
-
-  const total = subtotal; // Ajusta si agregas impuestos/envio
+  const items = useShoppingCartStore((state) => state.items);
+  const subtotal = useShoppingCartStore(selectSubtotal);
+  const updateQuantity = useShoppingCartStore((state) => state.updateQuantity);
+  const removeItem = useShoppingCartStore((state) => state.removeItem);
 
   const remainingForFreeShipping = Math.max(
     FREE_SHIPPING_THRESHOLD - subtotal,
     0,
   );
-
+  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  const total = subtotal + shippingCost;
   const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
-
-  const updateQuantity = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item,
-      ),
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
 
   return (
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
@@ -124,76 +79,86 @@ export function ShoppingCartDrawer() {
           </div>
 
           <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto pr-1">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex gap-3 rounded-lg border border-border p-3"
-              >
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => removeItem(item.id)}
-                    className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground transition hover:text-destructive"
-                    aria-label="Eliminar"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold leading-tight">
-                        {item.name}
-                      </p>
-                      {item.variant && (
-                        <p className="text-xs text-muted-foreground">
-                          {item.variant}
-                        </p>
-                      )}
-                    </div>
-                    <span className="text-sm font-semibold">
-                      {currencyFormatter.format(item.price * item.quantity)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, -1)}
-                      aria-label="Disminuir cantidad"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <Input
-                      className="h-8 w-12 text-center text-sm font-medium"
-                      value={item.quantity}
-                      readOnly
+            {items.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                Tu carrito está vacío
+              </div>
+            ) : (
+              items.map((item) => (
+                <div
+                  key={item.variantId}
+                  className="flex gap-3 rounded-lg border border-border p-3"
+                >
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
                     />
                     <Button
                       size="icon"
-                      variant="outline"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, 1)}
-                      aria-label="Aumentar cantidad"
+                      variant="ghost"
+                      onClick={() => removeItem(item.variantId)}
+                      className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground transition hover:text-destructive"
+                      aria-label="Eliminar"
                     >
-                      <Plus className="h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
+
+                  <div className="flex flex-1 flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold leading-tight">
+                          {item.productName}
+                        </p>
+                        {item.variantSize && (
+                          <p className="text-xs text-muted-foreground">
+                            {item.variantSize}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold">
+                        {currencyFormatter.format(item.price * item.quantity)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() =>
+                          updateQuantity(item.variantId, item.quantity - 1)
+                        }
+                        aria-label="Disminuir cantidad"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        className="h-8 w-12 text-center text-sm font-medium"
+                        value={item.quantity}
+                        readOnly
+                      />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() =>
+                          updateQuantity(item.variantId, item.quantity + 1)
+                        }
+                        aria-label="Aumentar cantidad"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="shrink-0 space-y-2 rounded-lg border border-border p-4">
@@ -208,7 +173,7 @@ export function ShoppingCartDrawer() {
               <span className="font-semibold">
                 {remainingForFreeShipping === 0
                   ? "Gratis"
-                  : currencyFormatter.format(8000)}
+                  : currencyFormatter.format(SHIPPING_COST)}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm font-semibold">
