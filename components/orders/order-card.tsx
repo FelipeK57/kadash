@@ -6,17 +6,26 @@ import { ChevronRight, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderItem {
-  id: string;
+  id: string | number;
   name: string;
   quantity: number;
   price: number;
 }
 
+const STATUS_MAP: Record<string, "pending" | "processing" | "shipped" | "delivered" | "cancelled"> = {
+  PENDING: "pending",
+  PAID: "processing",
+  SHIPPED: "shipped",
+  CANCELLED: "cancelled",
+};
+
+export type OrderCardStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+
 interface OrderCardProps {
-  id: string;
+  id: string | number;
   orderNumber: string;
   date: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  status: OrderCardStatus | string;
   total: number;
   items: OrderItem[];
   href?: string;
@@ -59,7 +68,8 @@ export const OrderCard = ({
   items,
   href,
 }: OrderCardProps) => {
-  const statusInfo = statusConfig[status];
+  const mappedStatus = STATUS_MAP[status] ?? status;
+  const statusInfo = statusConfig[mappedStatus as OrderCardStatus] ?? statusConfig.pending;
 
   return (
     <Link href={href || `/cuenta/ordenes/${id}`} className="block">

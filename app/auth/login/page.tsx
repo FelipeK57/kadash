@@ -10,7 +10,7 @@ import { Mail, Lock, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { loginService } from "./services/login.service";
 import { useAuthStore } from "@/store/auth-store";
-import router from "next/router";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,7 +47,7 @@ export default function LoginPage() {
         const response = await loginService({ email, password });
         login(response.token);
       } catch (error) {
-        console.error(error);
+        toast.error(typeof error === "string" ? error : "Error al iniciar sesión");
       }
     }
   };

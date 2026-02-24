@@ -11,8 +11,7 @@ export interface Product {
   slug: string;
   code: string;
   description: string;
-  category: Category;
-  categoryId: number;
+  categories: Category[];
   storeId: number;
   createdAt?: string;
   image: string;

@@ -18,7 +18,10 @@ import {
   selectSubtotal,
 } from "@/store/shopping-cart-store";
 import { useAuthStore } from "@/store/auth-store";
-import { createCheckoutOrder } from "./services/checkout.service";
+import {
+  createCheckoutOrder,
+  createMercadoPagoCheckout,
+} from "./services/checkout.service";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ACCOUNT_QUERY_KEY } from "@/app/cuenta/hooks/use-account";
@@ -45,12 +48,13 @@ export default function CartPage() {
   const removeItem = useShoppingCartStore((state) => state.removeItem);
   const clearCart = useShoppingCartStore((state) => state.clearCart);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authPayload = useAuthStore((state) => state.payload);
 
   const shippingCost =
     subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shippingCost;
 
-  const handleProceedToPayment = async () => {
+  const handleCheckout = async () => {
     if (!isAuthenticated) {
       toast.error("Inicia sesión para proceder al pago");
       router.push("/auth/login");
@@ -59,6 +63,32 @@ export default function CartPage() {
 
     setIsCheckoutLoading(true);
     try {
+      if (PAYMENT_METHOD_MOCK === "MERCADOPAGO") {
+        const storeId = authPayload.storeId || items[0]?.storeId;
+        if (!storeId) {
+          toast.error("No se pudo determinar la tienda");
+          return;
+        }
+        const { init_point, orderId } = await createMercadoPagoCheckout({
+          storeId,
+          cart: items.map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+          })),
+          clientId: authPayload.clientId,
+        });
+        if (init_point && orderId) {
+          window.open(init_point, "_blank", "noopener,noreferrer");
+          clearCart();
+          queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
+          toast.success(
+            "Se abrió la ventana de pago. Al terminar verás el estado en tu orden."
+          );
+          router.push(`/cuenta/ordenes/${orderId}`);
+          return;
+        }
+      }
+
       const payload = {
         items: items.map((item) => ({
           variantId: item.variantId,
@@ -213,7 +243,7 @@ export default function CartPage() {
               <Button
                 className="w-full"
                 size="lg"
-                onClick={handleProceedToPayment}
+                onClick={handleCheckout}
                 disabled={isCheckoutLoading}
               >
                 {isCheckoutLoading ? "Procesando..." : "Proceder al Pago"}

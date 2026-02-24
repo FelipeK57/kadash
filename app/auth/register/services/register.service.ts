@@ -10,10 +10,9 @@ export async function registerService(data: RegisterDto) {
     });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        throw error.response.data.message;
-      }
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      throw error.response.data.message;
     }
+    throw "Error de conexión. Intenta de nuevo.";
   }
 }

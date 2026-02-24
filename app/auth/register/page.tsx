@@ -11,6 +11,7 @@ import { useState } from "react";
 import { registerService } from "./services/register.service";
 import { RegisterDto } from "./dtos";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -110,10 +111,11 @@ export default function RegisterPage() {
       };
       // Aquí iría la lógica de registro
       try {
-        const response = await registerService(data);
+        await registerService(data);
         router.push("/auth/login");
+        toast.success("Cuenta creada correctamente");
       } catch (error) {
-        console.error(error);
+        toast.error(typeof error === "string" ? error : "Error al registrar");
       }
     }
   };
