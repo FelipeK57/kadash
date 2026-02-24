@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heart, ShoppingBag, Star, Truck, ShieldCheck } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-import { Product } from "../types";
+import { ChangeEvent, useState } from "react";
+import { Product, Review } from "../types";
 import { useShoppingCartStore } from "@/store/shopping-cart-store";
 import { toast } from "sonner";
 import {
@@ -23,6 +23,20 @@ type Props = {
 export default function ProductClient({ product }: Props) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState<Review[]>(product.reviews ?? []);
+  const [averageRating, setAverageRating] = useState<number | null>(
+    product.averageRating ?? (product.reviews && product.reviews.length
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : null)
+  );
+  const [reviewsCount, setReviewsCount] = useState<number>(
+    product.reviewsCount ?? product.reviews?.length ?? 0
+  );
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewImage, setReviewImage] = useState<File | null>(null);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const addItem = useShoppingCartStore((state) => state.addItem);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isFavorited = useIsFavorite(product.id);
@@ -31,8 +45,6 @@ export default function ProductClient({ product }: Props) {
 
   const name = product.name;
   const description = product.description;
-  const rating = 4.6;
-  const reviewsCount = 128;
 
   const handleAddToCart = () => {
     if (!selectedVariant?.id || !product.id) return;
@@ -66,28 +78,55 @@ export default function ProductClient({ product }: Props) {
       addFavorite.mutate(product.id);
     }
   };
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const reviews = [
-    {
-      id: 1,
-      author: "María P.",
-      rating: 5,
-      comment:
-        "Excelente producto, dejó mi cabello súper suave y con brillo. Recomendado!",
-    },
-    {
-      id: 2,
-      author: "Luisa R.",
-      rating: 4,
-      comment: "Huele delicioso y se nota el cambio desde la primera semana.",
-    },
-    {
-      id: 3,
-      author: "Ana G.",
-      rating: 5,
-      comment: "Cumple lo que promete. Volvería a comprar sin duda.",
-    },
-  ];
+    if (!isAuthenticated) {
+      toast.error("Inicia sesión para dejar una reseña");
+      return;
+    }
+
+    if (!product.id) return;
+
+    if (!reviewComment.trim()) {
+      toast.error("Escribe un comentario para tu reseña");
+      return;
+    }
+
+    try {
+      setIsSubmittingReview(true);
+      // Lazy import to avoid server-side issues
+      const { createReview } = await import("../services/reviews.service");
+      const newReview = await createReview({
+        productId: product.id,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+        image: reviewImage,
+      });
+
+      setReviews((prev) => [newReview, ...prev]);
+      const nextCount = reviewsCount + 1;
+      setReviewsCount(nextCount);
+      setAverageRating((prevAvg) => {
+        if (prevAvg === null || reviewsCount === 0) {
+          return reviewRating;
+        }
+        const total = prevAvg * reviewsCount + reviewRating;
+        return total / nextCount;
+      });
+
+      setReviewRating(5);
+      setReviewComment("");
+      setReviewImage(null);
+
+      toast.success("¡Gracias por tu reseña!");
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo enviar tu reseña, intenta de nuevo.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   return (
     <main className="py-8 md:py-12 bg-background">
@@ -123,9 +162,11 @@ export default function ProductClient({ product }: Props) {
                     />
                   ))}
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  ({rating})
-                </p>
+                {averageRating !== null && (
+                  <p className="text-sm font-medium text-muted-foreground">
+                    ({averageRating.toFixed(1)})
+                  </p>
+                )}
                 <a
                   href="#reviews"
                   className="text-sm font-medium underline hover:no-underline"
@@ -277,6 +318,87 @@ export default function ProductClient({ product }: Props) {
           <h2 className="text-xl font-semibold mb-6">
             Reseñas de clientes ({reviewsCount})
           </h2>
+
+          {/* Formulario para nueva reseña */}
+          <form
+            onSubmit={handleSubmitReview}
+            className="mb-8 p-4 border rounded-lg space-y-4"
+          >
+            <h3 className="font-medium">Escribe tu reseña</h3>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-muted-foreground">
+                Calificación:
+              </span>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setReviewRating(value)}
+                    className="p-1"
+                  >
+                    <Star
+                      className={`size-5 ${
+                        value <= reviewRating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="ml-2 text-sm text-muted-foreground">
+                  {reviewRating}/5
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-muted-foreground">
+                Comentario
+              </label>
+              <textarea
+                className="w-full rounded-md border px-3 py-2 text-sm min-h-24"
+                placeholder="Cuéntanos tu experiencia con este producto"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-muted-foreground">
+                Imagen (opcional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setReviewImage(file);
+                }}
+                className="text-sm"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isSubmittingReview || !isAuthenticated}
+              className="w-full md:w-auto"
+            >
+              {isSubmittingReview
+                ? "Enviando..."
+                : !isAuthenticated
+                  ? "Inicia sesión para reseñar"
+                  : "Publicar reseña"}
+            </Button>
+
+            {!isAuthenticated && (
+              <p className="text-xs text-muted-foreground">
+                Debes iniciar sesión para publicar una reseña.
+              </p>
+            )}
+          </form>
+
+          {/* Listado de reseñas */}
           <div className="space-y-6">
             {reviews.map((r) => (
               <div key={r.id} className="border-b pb-6 last:border-0">
@@ -294,11 +416,31 @@ export default function ProductClient({ product }: Props) {
                     ))}
                   </div>
                   <span className="font-medium">{r.rating}/5</span>
-                  <span className="text-muted-foreground">• {r.author}</span>
+                  {r.authorName && (
+                    <span className="text-muted-foreground">
+                      • {r.authorName}
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground">{r.comment}</p>
+                {r.imageUrl && (
+                  <div className="mt-3">
+                    <Image
+                      src={r.imageUrl}
+                      alt={`Reseña de ${name}`}
+                      width={300}
+                      height={300}
+                      className="w-40 h-40 object-cover rounded-md z-0"
+                    />
+                  </div>
+                )}
               </div>
             ))}
+            {reviews.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Aún no hay reseñas para este producto.
+              </p>
+            )}
           </div>
         </section>
       </div>

@@ -5,6 +5,15 @@ export interface Category {
   createdAt: Date;
 }
 
+export interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  imageUrl?: string | null;
+  authorName?: string | null;
+  createdAt: string;
+}
+
 export interface Product {
   id?: number;
   name: string;
@@ -16,6 +25,9 @@ export interface Product {
   createdAt?: string;
   image: string;
   variants: ProductVariant[];
+  averageRating?: number | null;
+  reviewsCount?: number;
+  reviews?: Review[];
 }
 
 export interface ProductVariant {
