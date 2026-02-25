@@ -31,14 +31,20 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Category, Product } from "./types";
+import type { ProductsPagination } from "./services/product.service";
 import ProductCard from "./components/ProductCard";
 
 type Props = {
   products: Product[];
   categories: Category[];
+  pagination: ProductsPagination;
 };
 
-export default function ProductsClient({ products, categories }: Props) {
+export default function ProductsClient({
+  products,
+  categories,
+  pagination,
+}: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -52,9 +58,13 @@ export default function ProductsClient({ products, categories }: Props) {
   const updateQueryParam = (
     key: string,
     value: string,
-    options?: { multi?: boolean },
+    options?: { multi?: boolean; resetPage?: boolean },
   ) => {
     const params = new URLSearchParams(searchParams.toString());
+
+    if (options?.resetPage !== false) {
+      params.delete("page");
+    }
 
     if (options?.multi) {
       const current = params.get(key)?.split(",").filter(Boolean) ?? [];
@@ -73,7 +83,17 @@ export default function ProductsClient({ products, categories }: Props) {
       params.delete(key);
     }
 
-    // Navegar a la nueva URL con los parámetros actualizados
+    router.push(`/productos?${params.toString()}`);
+    router.refresh();
+  };
+
+  const goToPage = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (newPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(newPage));
+    }
     router.push(`/productos?${params.toString()}`);
     router.refresh();
   };
@@ -166,7 +186,7 @@ export default function ProductsClient({ products, categories }: Props) {
           <div className="mb-6">
             <h1 className="text-2xl font-bold">Todos los Productos</h1>
             <p className="text-muted-foreground">
-              {products.length} productos encontrados
+              {pagination.total} productos encontrados
             </p>
           </div>
 
@@ -175,6 +195,82 @@ export default function ProductsClient({ products, categories }: Props) {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+
+          {pagination.totalPages > 1 && (
+            <Pagination className="mt-6">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (pagination.page > 1) {
+                        goToPage(pagination.page - 1);
+                      }
+                    }}
+                    aria-disabled={pagination.page <= 1}
+                    className={
+                      pagination.page <= 1
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                  .filter((p) => {
+                    const current = pagination.page;
+                    return (
+                      p === 1 ||
+                      p === pagination.totalPages ||
+                      Math.abs(p - current) <= 1
+                    );
+                  })
+                  .reduce<number[]>((acc, p) => {
+                    const last = acc[acc.length - 1];
+                    if (last !== undefined && p - last > 1) acc.push(-1);
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, idx) =>
+                    p === -1 ? (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            goToPage(p);
+                          }}
+                          isActive={p === pagination.page}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (pagination.page < pagination.totalPages) {
+                        goToPage(pagination.page + 1);
+                      }
+                    }}
+                    aria-disabled={pagination.page >= pagination.totalPages}
+                    className={
+                      pagination.page >= pagination.totalPages
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </div>
     </main>

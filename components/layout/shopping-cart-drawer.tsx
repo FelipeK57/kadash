@@ -19,9 +19,8 @@ import {
   useShoppingCartStore,
   selectSubtotal,
 } from "@/store/shopping-cart-store";
-
-const FREE_SHIPPING_THRESHOLD = 50000;
-const SHIPPING_COST = 8000;
+import { useShippingConfig } from "@/app/carrito/hooks/use-shipping-config";
+import type { ShippingConfigProp } from "./header";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -29,21 +28,38 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
   maximumFractionDigits: 0,
 });
 
-export function ShoppingCartDrawer() {
+type ShoppingCartDrawerProps = {
+  /** Si viene del layout (SSR), se usa este valor para envío; si no, se usa useShippingConfig(storeId) */
+  shippingConfig?: ShippingConfigProp | null;
+};
+
+export function ShoppingCartDrawer({
+  shippingConfig: shippingConfigProp,
+}: ShoppingCartDrawerProps = {}) {
   const [open, setOpen] = useState(false);
 
   const items = useShoppingCartStore((state) => state.items);
   const subtotal = useShoppingCartStore(selectSubtotal);
   const updateQuantity = useShoppingCartStore((state) => state.updateQuantity);
   const removeItem = useShoppingCartStore((state) => state.removeItem);
+  const storeId = items[0]?.storeId;
+  const clientConfig = useShippingConfig(storeId);
+
+  const freeShippingThreshold =
+    shippingConfigProp?.freeShippingThreshold ?? clientConfig.freeShippingThreshold;
+  const configShippingCost =
+    shippingConfigProp?.shippingCost ?? clientConfig.shippingCost;
 
   const remainingForFreeShipping = Math.max(
-    FREE_SHIPPING_THRESHOLD - subtotal,
+    freeShippingThreshold - subtotal,
     0,
   );
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  const shippingCost = subtotal >= freeShippingThreshold ? 0 : configShippingCost;
   const total = subtotal + shippingCost;
-  const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+  const progress =
+    freeShippingThreshold > 0
+      ? Math.min((subtotal / freeShippingThreshold) * 100, 100)
+      : 100;
 
   return (
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
@@ -173,7 +189,7 @@ export function ShoppingCartDrawer() {
               <span className="font-semibold">
                 {remainingForFreeShipping === 0
                   ? "Gratis"
-                  : currencyFormatter.format(SHIPPING_COST)}
+                  : currencyFormatter.format(shippingCost)}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm font-semibold">

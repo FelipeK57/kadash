@@ -87,7 +87,7 @@ export default function ProductCard({ product }: { product: Product }) {
                       ${product.originalPrice.toLocaleString()}
                     </span> */}
           <span className="font-bold text-xl text-primary">
-            ${product.variants[0].price}
+            ${product.variants[0].price.toLocaleString("es-CO")}
           </span>
         </div>
       </CardContent>

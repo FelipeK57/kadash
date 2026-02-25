@@ -1,15 +1,30 @@
+export type ProductsPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 type GetProductsParams = {
   categories?: string[];
   sort?: string;
+  page?: number;
+  limit?: number;
 };
 
-export async function getProducts({ categories, sort }: GetProductsParams) {
+export async function getProducts({
+  categories,
+  sort,
+  page = 1,
+  limit = 12,
+}: GetProductsParams) {
   const params = new URLSearchParams({
     storeId: process.env.NEXT_STORE_ID || "",
     sort: sort || "nuevo",
+    page: String(page),
+    limit: String(limit),
   });
 
-  // Agrega múltiples categorías
   if (categories && categories.length > 0) {
     categories.forEach((cat) => params.append("category", cat));
   }

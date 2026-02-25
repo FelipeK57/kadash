@@ -7,12 +7,41 @@ import { Input } from "../ui/input";
 import { MobileMenu } from "./mobile-menu";
 import { ShoppingCartDrawer } from "./shopping-cart-drawer";
 
-export const Header = () => {
+export type ShippingConfigProp = {
+  freeShippingThreshold: number;
+  shippingCost: number;
+};
+
+export type HeaderProps = {
+  freeShippingThreshold?: number | null;
+  /** Config de envío para el drawer del carrito (mismo valor que el banner) */
+  shippingConfig?: ShippingConfigProp;
+};
+
+const currencyFormatter = new Intl.NumberFormat("es-CO", {
+  style: "currency",
+  currency: "COP",
+  maximumFractionDigits: 0,
+});
+
+export const Header = ({
+  freeShippingThreshold,
+  shippingConfig,
+}: HeaderProps) => {
+  const thresholdForBanner =
+    (typeof freeShippingThreshold === "number" && freeShippingThreshold > 0
+      ? freeShippingThreshold
+      : shippingConfig?.freeShippingThreshold) ?? 50000;
+
+  const bannerText = `Envío gratis en compras mayores a ${currencyFormatter.format(
+    thresholdForBanner,
+  )}`;
+
   return (
     <header className="sticky top-0 bg-background z-50 border-b border-border">
       {/* Banda de envío gratis - solo visible en desktop */}
       <div className="hidden md:block bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">
-        Envío gratis en compras mayores a $50.000
+        {bannerText}
       </div>
 
       {/* Header principal - 3 columnas */}
@@ -47,7 +76,7 @@ export const Header = () => {
                 <User className="text-primary" />
               </Button>
             </Link>
-            <ShoppingCartDrawer />
+            <ShoppingCartDrawer shippingConfig={shippingConfig} />
           </div>
         </div>
 
@@ -60,7 +89,7 @@ export const Header = () => {
 
       {/* Banda de envío gratis - visible en mobile debajo del header */}
       <div className="md:hidden bg-primary p-1 text-xs text-center text-primary-foreground font-semibold">
-        Envío gratis en compras mayores a $50.000
+        {bannerText}
       </div>
     </header>
   );

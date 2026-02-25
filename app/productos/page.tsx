@@ -5,26 +5,33 @@ type Props = {
   searchParams: Promise<{
     category?: string;
     sort?: string;
+    page?: string;
   }>;
 };
 
 export default async function ProductsPage(props: Props) {
   const searchParams = await props.searchParams;
 
-  // Obtén las categorías como array
   const categoryParam = searchParams.category;
   const categories = categoryParam
     ? categoryParam.split(",").map((c) => c.trim())
     : undefined;
 
-  const products = await getProducts({
+  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+
+  const data = await getProducts({
     categories,
     sort: searchParams.sort,
+    page,
   });
 
   const categoriesList = await getCategories();
 
   return (
-    <ProductsClient products={products.items} categories={categoriesList} />
+    <ProductsClient
+      products={data.items}
+      categories={categoriesList}
+      pagination={data.pagination}
+    />
   );
 }

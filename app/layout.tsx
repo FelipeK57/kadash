@@ -27,11 +27,59 @@ export const metadata: Metadata = {
 import { QueryProvider } from "./providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 
-export default function RootLayout({
+type ShippingConfig = {
+  freeShippingThreshold: number;
+  shippingCost: number;
+};
+
+async function fetchShippingConfig(): Promise<ShippingConfig> {
+  const storeId = process.env.NEXT_STORE_ID;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const defaults: ShippingConfig = {
+    freeShippingThreshold: 50000,
+    shippingCost: 8000,
+  };
+
+  if (!storeId || !apiUrl) {
+    return defaults;
+  }
+
+  try {
+    const res = await fetch(
+      `${apiUrl}/store/shipping-config?storeId=${storeId}`,
+      {
+        next: { revalidate: 60 },
+      },
+    );
+    if (!res.ok) {
+      return defaults;
+    }
+    const data = (await res.json()) as {
+      freeShippingThreshold: number | null;
+      shippingCost: number | null;
+    };
+    return {
+      freeShippingThreshold:
+        typeof data.freeShippingThreshold === "number"
+          ? data.freeShippingThreshold
+          : defaults.freeShippingThreshold,
+      shippingCost:
+        typeof data.shippingCost === "number"
+          ? data.shippingCost
+          : defaults.shippingCost,
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const shippingConfig = await fetchShippingConfig();
+
   return (
     <html lang="en">
       <head>
@@ -46,7 +94,10 @@ export default function RootLayout({
         <QueryProvider>
           <Toaster richColors theme="light" position="top-center" />
           <ScrollToTop />
-          <Header />
+          <Header
+            freeShippingThreshold={shippingConfig.freeShippingThreshold}
+            shippingConfig={shippingConfig}
+          />
           <main className="flex-1">{children}</main>
           <Footer />
           <Button

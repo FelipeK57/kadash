@@ -159,7 +159,7 @@ export default function Home() {
   return (
     <main className="flex flex-col">
       <Image
-        src="/banner.jpeg"
+        src="/hero.webp"
         alt="Hero Image"
         width={1920}
         height={600}

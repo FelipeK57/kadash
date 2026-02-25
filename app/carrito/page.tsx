@@ -26,9 +26,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ACCOUNT_QUERY_KEY } from "@/app/cuenta/hooks/use-account";
 import { useState } from "react";
+import { useShippingConfig } from "./hooks/use-shipping-config";
 
-const FREE_SHIPPING_THRESHOLD = 50000;
-const SHIPPING_COST = 8000;
 const PAYMENT_METHOD_MOCK = "MERCADOPAGO";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
@@ -49,9 +48,12 @@ export default function CartPage() {
   const clearCart = useShoppingCartStore((state) => state.clearCart);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const authPayload = useAuthStore((state) => state.payload);
+  const storeId = authPayload?.storeId ?? items[0]?.storeId;
+  const { freeShippingThreshold, shippingCost: configShippingCost } =
+    useShippingConfig(storeId);
 
   const shippingCost =
-    subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    subtotal >= freeShippingThreshold ? 0 : configShippingCost;
   const total = subtotal + shippingCost;
 
   const handleCheckout = async () => {
