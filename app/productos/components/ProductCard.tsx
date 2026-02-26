@@ -8,7 +8,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Product } from "../types";
 import Image from "next/image";
 import { useShoppingCartStore } from "@/store/shopping-cart-store";
@@ -28,15 +28,31 @@ export default function ProductCard({ product }: { product: Product }) {
   const addFavorite = useAddFavorite();
   const removeFavorite = useRemoveFavorite();
 
+  const baseVariant = product.variants[0];
+  const effectivePrice =
+    baseVariant?.discountPrice != null && baseVariant.discountPrice > 0
+      ? baseVariant.discountPrice
+      : baseVariant?.price ?? 0;
+  const hasDiscount =
+    baseVariant?.discountPrice != null &&
+    baseVariant.discountPrice > 0 &&
+    baseVariant.discountPrice < baseVariant.price;
+
+  const hasRating =
+    product.averageRating != null &&
+    typeof product.reviewsCount === "number" &&
+    product.reviewsCount > 0;
+
   const handleAddToCart = () => {
-    const variant = product.variants[0];
+    const variant = baseVariant;
     if (!variant?.id || !product.id) return;
     addItem({
       variantId: variant.id,
       productId: product.id,
       productName: product.name,
       variantSize: variant.size,
-      price: variant.price,
+      price: effectivePrice,
+      originalPrice: hasDiscount ? baseVariant.price : undefined,
       imageUrl: variant.imageUrl || product.image,
     });
     toast.success(`${product.name} agregado al carrito`);
@@ -76,18 +92,25 @@ export default function ProductCard({ product }: { product: Product }) {
             </h3>
           </Link>
         </div>
+        {hasRating && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Star className="size-3.5 text-yellow-400 fill-yellow-400" />
+            <span className="font-medium">
+              {product.averageRating!.toFixed(1)}/5
+            </span>
+            <span>({product.reviewsCount})</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-2">
-        {/* <span className="flex items-center gap-1 text-sm">
-                    <Star className="size-4 text-yellow-400 fill-yellow-400" />
-                    {product.rating}/5 ({product.reviews})
-                  </span> */}
         <div className="flex flex-col md:flex-row md:items-center gap-2">
-          {/* <span className="text line-through text-muted-foreground">
-                      ${product.originalPrice.toLocaleString()}
-                    </span> */}
-          <span className="font-bold text-xl text-primary">
-            ${product.variants[0].price.toLocaleString("es-CO")}
+          {hasDiscount && (
+            <span className="text-xs line-through text-muted-foreground">
+              ${baseVariant.price.toLocaleString("es-CO")}
+            </span>
+          )}
+          <span className="font-bold text-lg text-primary">
+            ${effectivePrice.toLocaleString("es-CO")}
           </span>
         </div>
       </CardContent>

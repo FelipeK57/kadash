@@ -137,9 +137,17 @@ export function ShoppingCartDrawer({
                           </p>
                         )}
                       </div>
-                      <span className="text-sm font-semibold">
-                        {currencyFormatter.format(item.price * item.quantity)}
-                      </span>
+                      <div className="text-right text-sm font-semibold">
+                        {item.originalPrice != null &&
+                          item.originalPrice > item.price && (
+                            <p className="line-through text-muted-foreground">
+                              {currencyFormatter.format(
+                                item.originalPrice * item.quantity
+                              )}
+                            </p>
+                          )}
+                        <p>{currencyFormatter.format(item.price * item.quantity)}</p>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2">

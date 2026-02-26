@@ -46,6 +46,11 @@ export default function ProductClient({ product }: Props) {
   const name = product.name;
   const description = product.description;
 
+  const getEffectivePrice = (variant: Product["variants"][number]) =>
+    variant.discountPrice != null && variant.discountPrice > 0
+      ? variant.discountPrice
+      : variant.price;
+
   const handleAddToCart = () => {
     if (!selectedVariant?.id || !product.id) return;
     addItem(
@@ -54,7 +59,13 @@ export default function ProductClient({ product }: Props) {
         productId: product.id,
         productName: product.name,
         variantSize: selectedVariant.size,
-        price: selectedVariant.price,
+        price: getEffectivePrice(selectedVariant),
+        originalPrice:
+          selectedVariant.discountPrice != null &&
+          selectedVariant.discountPrice > 0 &&
+          selectedVariant.discountPrice < selectedVariant.price
+            ? selectedVariant.price
+            : undefined,
         imageUrl: selectedVariant.imageUrl || product.image,
       },
       quantity
@@ -149,9 +160,18 @@ export default function ProductClient({ product }: Props) {
             <h1 className="text-xl font-semibold sm:text-2xl">{name}</h1>
 
             <div className="flex flex-col gap-4 mt-4 ">
-              <p className="text-2xl font-extrabold text-primary sm:text-3xl">
-                ${selectedVariant.price.toLocaleString("es-CO")}
-              </p>
+              <div className="flex items-baseline gap-2">
+                {selectedVariant.discountPrice != null &&
+                  selectedVariant.discountPrice > 0 &&
+                  selectedVariant.discountPrice < selectedVariant.price && (
+                    <p className="text-lg line-through text-muted-foreground">
+                      ${selectedVariant.price.toLocaleString("es-CO")}
+                    </p>
+                  )}
+                <p className="text-2xl font-extrabold text-primary sm:text-3xl">
+                  ${getEffectivePrice(selectedVariant).toLocaleString("es-CO")}
+                </p>
+              </div>
 
               <div className="flex items-center gap-2 mt-2 sm:mt-0">
                 <div className="flex items-center gap-1">

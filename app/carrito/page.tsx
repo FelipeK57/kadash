@@ -171,9 +171,17 @@ export default function CartPage() {
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
-                    <p className="text-primary font-bold text-lg sm:text-xl">
-                      {currencyFormatter.format(item.price)}
-                    </p>
+                    <div className="flex flex-col gap-1">
+                      {item.originalPrice != null &&
+                        item.originalPrice > item.price && (
+                          <p className="text-sm line-through text-muted-foreground">
+                            {currencyFormatter.format(item.originalPrice)}
+                          </p>
+                        )}
+                      <p className="text-primary font-bold text-lg sm:text-xl">
+                        {currencyFormatter.format(item.price)}
+                      </p>
+                    </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 border rounded-md">
                         <Button
@@ -198,9 +206,19 @@ export default function CartPage() {
                           <Plus className="size-4" />
                         </Button>
                       </div>
-                      <p className="font-bold text-end text-lg sm:text-xl">
-                        {currencyFormatter.format(item.price * item.quantity)}
-                      </p>
+                      <div className="text-end">
+                        {item.originalPrice != null &&
+                          item.originalPrice > item.price && (
+                            <p className="text-sm line-through text-muted-foreground">
+                              {currencyFormatter.format(
+                                item.originalPrice * item.quantity
+                              )}
+                            </p>
+                          )}
+                        <p className="font-bold text-lg sm:text-xl">
+                          {currencyFormatter.format(item.price * item.quantity)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

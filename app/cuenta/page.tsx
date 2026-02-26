@@ -173,7 +173,7 @@ export default function AccountPage() {
     <div className="space-y-6">
       {/* Profile Card */}
       <Card className="shadow-none">
-        <CardContent className="pt-6">
+        <CardContent>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <img

@@ -12,7 +12,10 @@ export interface CartItem {
   productId: number;
   productName: string;
   variantSize: string;
+  /** Precio unitario efectivo (ya con descuento si aplica). */
   price: number;
+  /** Precio unitario original sin descuento, si aplica. */
+  originalPrice?: number | null;
   quantity: number;
   imageUrl: string;
   storeId?: number;
