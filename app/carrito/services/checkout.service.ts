@@ -27,6 +27,8 @@ export interface MercadoPagoCheckoutPayload {
   storeId: number;
   cart: MercadoPagoCartItem[];
   clientId?: number;
+  /** Requerido cuando hay clientId (cliente autenticado) */
+  deliveryAddressId?: number;
   guestEmail?: string;
   guestPhone?: string;
   /** URLs de retorno después del pago (opcional; el backend usa STOREFRONT_URL si no se envían) */

@@ -22,6 +22,10 @@ import {
   Heart,
   ChevronRight,
   Pencil,
+  MapPin,
+  Plus,
+  Trash2,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
 import { useAccount } from "./hooks/use-account";
@@ -29,6 +33,13 @@ import { updateAccountData } from "./services/account.service";
 import { useQueryClient } from "@tanstack/react-query";
 import { ACCOUNT_QUERY_KEY } from "./hooks/use-account";
 import { toast } from "sonner";
+import {
+  useAddresses,
+  useCreateAddress,
+  useUpdateAddress,
+  useDeleteAddress,
+} from "./hooks/use-addresses";
+import type { DeliveryAddress } from "./services/addresses.service";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -92,6 +103,22 @@ export default function AccountPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
+  const createAddressMutation = useCreateAddress();
+  const updateAddressMutation = useUpdateAddress();
+  const deleteAddressMutation = useDeleteAddress();
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<DeliveryAddress | null>(null);
+  const [addressForm, setAddressForm] = useState({
+    label: "",
+    addressLine: "",
+    city: "",
+    department: "",
+    phone: "",
+    isDefault: false,
+  });
+  const [addressFormErrors, setAddressFormErrors] = useState<Record<string, string>>({});
+
   const handleEditOpenChange = (open: boolean) => {
     setIsEditOpen(open);
     if (open && data?.client) {
@@ -154,6 +181,70 @@ export default function AccountPage() {
       toast.error(typeof err === "string" ? err : "Error al actualizar");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const openAddressDialog = (address?: DeliveryAddress | null) => {
+    setEditingAddress(address ?? null);
+    setAddressForm({
+      label: address?.label ?? "",
+      addressLine: address?.addressLine ?? "",
+      city: address?.city ?? "",
+      department: address?.department ?? "",
+      phone: address?.phone ?? "",
+      isDefault: address?.isDefault ?? false,
+    });
+    setAddressFormErrors({});
+    setAddressDialogOpen(true);
+  };
+
+  const handleAddressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const err: Record<string, string> = {};
+    if (!addressForm.label.trim()) err.label = "Nombre o etiqueta es requerido";
+    if (!addressForm.addressLine.trim()) err.addressLine = "La dirección es requerida";
+    if (!addressForm.city.trim()) err.city = "La ciudad es requerida";
+    setAddressFormErrors(err);
+    if (Object.keys(err).length > 0) return;
+
+    try {
+      if (editingAddress) {
+        await updateAddressMutation.mutateAsync({
+          id: editingAddress.id,
+          data: {
+            label: addressForm.label.trim(),
+            addressLine: addressForm.addressLine.trim(),
+            city: addressForm.city.trim(),
+            department: addressForm.department.trim() || undefined,
+            phone: addressForm.phone.trim() || undefined,
+            isDefault: addressForm.isDefault,
+          },
+        });
+        toast.success("Dirección actualizada");
+      } else {
+        await createAddressMutation.mutateAsync({
+          label: addressForm.label.trim(),
+          addressLine: addressForm.addressLine.trim(),
+          city: addressForm.city.trim(),
+          department: addressForm.department.trim() || undefined,
+          phone: addressForm.phone.trim() || undefined,
+          isDefault: addressForm.isDefault,
+        });
+        toast.success("Dirección agregada");
+      }
+      setAddressDialogOpen(false);
+    } catch (msg) {
+      toast.error(typeof msg === "string" ? msg : "Error al guardar");
+    }
+  };
+
+  const handleDeleteAddress = async (id: number) => {
+    if (!confirm("¿Eliminar esta dirección?")) return;
+    try {
+      await deleteAddressMutation.mutateAsync(id);
+      toast.success("Dirección eliminada");
+    } catch (msg) {
+      toast.error(typeof msg === "string" ? msg : "Error al eliminar");
     }
   };
 
@@ -334,6 +425,194 @@ export default function AccountPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Direcciones de entrega */}
+      <Card className="shadow-none">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">Direcciones de entrega</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => openAddressDialog()}
+          >
+            <Plus className="size-4" />
+            Agregar dirección
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {addressesLoading ? (
+            <p className="text-sm text-muted-foreground py-4">Cargando...</p>
+          ) : addresses.length === 0 ? (
+            <div className="text-center py-6 border rounded-lg border-dashed">
+              <MapPin className="size-10 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground mb-2">
+                No tienes direcciones guardadas
+              </p>
+              <Button size="sm" variant="outline" onClick={() => openAddressDialog()}>
+                Agregar primera dirección
+              </Button>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {addresses.map((addr) => (
+                <li
+                  key={addr.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{addr.label}</span>
+                      {addr.isDefault && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Star className="size-3 fill-current" /> Predeterminada
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {addr.addressLine}, {addr.city}
+                      {addr.department ? `, ${addr.department}` : ""}
+                    </p>
+                    {addr.phone && (
+                      <p className="text-xs text-muted-foreground">{addr.phone}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openAddressDialog(addr)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleDeleteAddress(addr.id)}
+                      disabled={deleteAddressMutation.isPending}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingAddress ? "Editar dirección" : "Nueva dirección"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddressSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nombre o etiqueta (ej. Casa, Oficina)</Label>
+              <Input
+                value={addressForm.label}
+                onChange={(e) =>
+                  setAddressForm((p) => ({ ...p, label: e.target.value }))
+                }
+                placeholder="Casa"
+                aria-invalid={!!addressFormErrors.label}
+              />
+              {addressFormErrors.label && (
+                <p className="text-sm text-destructive">{addressFormErrors.label}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>Dirección</Label>
+              <Input
+                value={addressForm.addressLine}
+                onChange={(e) =>
+                  setAddressForm((p) => ({ ...p, addressLine: e.target.value }))
+                }
+                placeholder="Calle 123 #45-67"
+                aria-invalid={!!addressFormErrors.addressLine}
+              />
+              {addressFormErrors.addressLine && (
+                <p className="text-sm text-destructive">
+                  {addressFormErrors.addressLine}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ciudad</Label>
+                <Input
+                  value={addressForm.city}
+                  onChange={(e) =>
+                    setAddressForm((p) => ({ ...p, city: e.target.value }))
+                  }
+                  placeholder="Bogotá"
+                  aria-invalid={!!addressFormErrors.city}
+                />
+                {addressFormErrors.city && (
+                  <p className="text-sm text-destructive">{addressFormErrors.city}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Departamento (opcional)</Label>
+                <Input
+                  value={addressForm.department}
+                  onChange={(e) =>
+                    setAddressForm((p) => ({ ...p, department: e.target.value }))
+                  }
+                  placeholder="Cundinamarca"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Teléfono de contacto (opcional)</Label>
+              <Input
+                type="tel"
+                value={addressForm.phone}
+                onChange={(e) =>
+                  setAddressForm((p) => ({ ...p, phone: e.target.value }))
+                }
+                placeholder="3001234567"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="addr-default"
+                checked={addressForm.isDefault}
+                onChange={(e) =>
+                  setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))
+                }
+                className="rounded border-input"
+              />
+              <Label htmlFor="addr-default" className="font-normal cursor-pointer">
+                Usar como dirección predeterminada
+              </Label>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddressDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={
+                  createAddressMutation.isPending || updateAddressMutation.isPending
+                }
+              >
+                {editingAddress ? "Guardar" : "Agregar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">

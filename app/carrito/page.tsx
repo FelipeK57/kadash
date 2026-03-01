@@ -27,6 +27,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ACCOUNT_QUERY_KEY } from "@/app/cuenta/hooks/use-account";
 import { useState } from "react";
 import { useShippingConfig } from "./hooks/use-shipping-config";
+import { useAddresses } from "@/app/cuenta/hooks/use-addresses";
+import { MapPin, Star } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const PAYMENT_METHOD_MOCK = "MERCADOPAGO";
 
@@ -40,6 +44,7 @@ export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
   const items = useShoppingCartStore((state) => state.items);
   const subtotal = useShoppingCartStore(selectSubtotal);
@@ -51,15 +56,31 @@ export default function CartPage() {
   const storeId = authPayload?.storeId ?? items[0]?.storeId;
   const { freeShippingThreshold, shippingCost: configShippingCost } =
     useShippingConfig(storeId);
+  const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
 
   const shippingCost =
     subtotal >= freeShippingThreshold ? 0 : configShippingCost;
   const total = subtotal + shippingCost;
 
+  const defaultAddressId = addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id;
+  const effectiveAddressId = selectedAddressId ?? defaultAddressId;
+
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       toast.error("Inicia sesión para proceder al pago");
       router.push("/auth/login");
+      return;
+    }
+
+    if (addresses.length === 0) {
+      toast.error("Agrega al menos una dirección de entrega en tu cuenta");
+      router.push("/cuenta");
+      return;
+    }
+
+    const deliveryAddressId = effectiveAddressId;
+    if (!deliveryAddressId) {
+      toast.error("Selecciona una dirección de entrega");
       return;
     }
 
@@ -78,6 +99,7 @@ export default function CartPage() {
             quantity: item.quantity,
           })),
           clientId: authPayload.clientId,
+          deliveryAddressId,
         });
         if (init_point && orderId) {
           window.open(init_point, "_blank", "noopener,noreferrer");
@@ -99,6 +121,7 @@ export default function CartPage() {
         })),
         total,
         paymentMethod: PAYMENT_METHOD_MOCK,
+        deliveryAddressId,
       };
 
       await createCheckoutOrder(payload);
@@ -234,6 +257,61 @@ export default function CartPage() {
               <CardTitle>Resumen del Pedido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Dirección de entrega (solo si está logueado) */}
+              {isAuthenticated && (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-4 text-muted-foreground" />
+                      <span className="font-medium text-sm">Dirección de entrega</span>
+                    </div>
+                    {addressesLoading ? (
+                      <p className="text-sm text-muted-foreground">Cargando...</p>
+                    ) : addresses.length === 0 ? (
+                      <div className="text-sm text-muted-foreground border rounded-lg p-3 bg-muted/50">
+                        <p className="mb-2">No tienes direcciones guardadas.</p>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href="/cuenta">Gestionar direcciones</Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <RadioGroup
+                        value={String(effectiveAddressId)}
+                        onValueChange={(v) => setSelectedAddressId(Number(v))}
+                        className="space-y-2"
+                      >
+                        {addresses.map((addr) => (
+                          <div
+                            key={addr.id}
+                            className="flex items-start gap-2 border rounded-lg p-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5"
+                          >
+                            <RadioGroupItem
+                              value={String(addr.id)}
+                              id={`addr-${addr.id}`}
+                              className="mt-0.5"
+                            />
+                            <Label
+                              htmlFor={`addr-${addr.id}`}
+                              className="flex-1 cursor-pointer text-sm font-normal"
+                            >
+                              <span className="font-medium">{addr.label}</span>
+                              {addr.isDefault && (
+                                <Star className="size-3 inline fill-amber-500 text-amber-500 ml-1" />
+                              )}
+                              <p className="text-muted-foreground mt-0.5">
+                                {addr.addressLine}, {addr.city}
+                                {addr.department ? `, ${addr.department}` : ""}
+                              </p>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    )}
+                  </div>
+                  <Separator />
+                </>
+              )}
+
               {/* Totales */}
               <div className="space-y-3">
                 <div className="flex justify-between text-base">
@@ -264,9 +342,16 @@ export default function CartPage() {
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={isCheckoutLoading}
+                disabled={
+                  isCheckoutLoading ||
+                  (isAuthenticated && addresses.length === 0)
+                }
               >
-                {isCheckoutLoading ? "Procesando..." : "Proceder al Pago"}
+                {isCheckoutLoading
+                  ? "Procesando..."
+                  : isAuthenticated && addresses.length === 0
+                    ? "Agrega una dirección de entrega"
+                    : "Proceder al Pago"}
               </Button>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/productos">Continuar Comprando</Link>

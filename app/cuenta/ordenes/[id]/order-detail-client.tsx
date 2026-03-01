@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock,
   CreditCard,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrderDetail } from "./hooks/use-order-detail";
@@ -178,6 +179,32 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dirección de entrega */}
+      {order.deliveryAddress && (
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MapPin className="size-5" />
+              Dirección de entrega
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-medium">{order.deliveryAddress.label}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {order.deliveryAddress.addressLine}, {order.deliveryAddress.city}
+              {order.deliveryAddress.department
+                ? `, ${order.deliveryAddress.department}`
+                : ""}
+            </p>
+            {order.deliveryAddress.phone && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Tel: {order.deliveryAddress.phone}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Items Section */}
       <Card className="shadow-none">
