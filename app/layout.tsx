@@ -79,6 +79,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const shippingConfig = await fetchShippingConfig();
+  const storeId = process.env.NEXT_STORE_ID ?? undefined;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? undefined;
 
   return (
     <html lang="en">
@@ -97,6 +99,8 @@ export default async function RootLayout({
           <Header
             freeShippingThreshold={shippingConfig.freeShippingThreshold}
             shippingConfig={shippingConfig}
+            storeId={storeId}
+            apiUrl={apiUrl}
           />
           <main className="flex-1">{children}</main>
           <Footer />

@@ -10,6 +10,7 @@ type GetProductsParams = {
   sort?: string;
   page?: number;
   limit?: number;
+  q?: string;
 };
 
 export async function getProducts({
@@ -17,6 +18,7 @@ export async function getProducts({
   sort,
   page = 1,
   limit = 12,
+  q,
 }: GetProductsParams) {
   const params = new URLSearchParams({
     storeId: process.env.NEXT_STORE_ID || "",
@@ -24,6 +26,10 @@ export async function getProducts({
     page: String(page),
     limit: String(limit),
   });
+
+  if (q && q.trim().length > 0) {
+    params.set("q", q.trim());
+  }
 
   if (categories && categories.length > 0) {
     categories.forEach((cat) => params.append("category", cat));

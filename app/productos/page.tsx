@@ -6,6 +6,7 @@ type Props = {
     category?: string;
     sort?: string;
     page?: string;
+    q?: string;
   }>;
 };
 
@@ -18,11 +19,13 @@ export default async function ProductsPage(props: Props) {
     : undefined;
 
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+  const query = searchParams.q?.trim() || undefined;
 
   const data = await getProducts({
     categories,
     sort: searchParams.sort,
     page,
+    q: query,
   });
 
   const categoriesList = await getCategories();
