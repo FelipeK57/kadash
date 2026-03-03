@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
+import { HeroCarousel } from "@/components/hero-carousel";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -158,13 +159,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col">
-      <Image
-        src="/hero.webp"
-        alt="Hero Image"
-        width={1920}
-        height={600}
-        className="w-full h-auto"
-      />
+      <HeroCarousel />
       {/* Categorias */}
       <section className="container mx-auto px-4 py-8">
         <h2 className="text-xl font-semibold text-center mb-6">
