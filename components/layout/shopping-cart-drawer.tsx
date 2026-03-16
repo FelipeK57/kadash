@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -46,7 +46,8 @@ export function ShoppingCartDrawer({
   const clientConfig = useShippingConfig(storeId);
 
   const freeShippingThreshold =
-    shippingConfigProp?.freeShippingThreshold ?? clientConfig.freeShippingThreshold;
+    shippingConfigProp?.freeShippingThreshold ??
+    clientConfig.freeShippingThreshold;
   const configShippingCost =
     shippingConfigProp?.shippingCost ?? clientConfig.shippingCost;
 
@@ -54,12 +55,21 @@ export function ShoppingCartDrawer({
     freeShippingThreshold - subtotal,
     0,
   );
-  const shippingCost = subtotal >= freeShippingThreshold ? 0 : configShippingCost;
+  const shippingCost =
+    subtotal >= freeShippingThreshold ? 0 : configShippingCost;
   const total = subtotal + shippingCost;
   const progress =
     freeShippingThreshold > 0
       ? Math.min((subtotal / freeShippingThreshold) * 100, 100)
       : 100;
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
@@ -142,11 +152,13 @@ export function ShoppingCartDrawer({
                           item.originalPrice > item.price && (
                             <p className="line-through text-muted-foreground">
                               {currencyFormatter.format(
-                                item.originalPrice * item.quantity
+                                item.originalPrice * item.quantity,
                               )}
                             </p>
                           )}
-                        <p>{currencyFormatter.format(item.price * item.quantity)}</p>
+                        <p>
+                          {currencyFormatter.format(item.price * item.quantity)}
+                        </p>
                       </div>
                     </div>
 

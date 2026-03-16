@@ -147,7 +147,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="bg-primary p-1 text-[10px] text-center text-primary-foreground font-semibold">
-        &copy; Todos los derechos reservados. Desarollado por SITCOLS
+        &copy; Todos los derechos reservados. Desarrollado por SITCOLS
       </div>
     </footer>
   );

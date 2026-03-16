@@ -10,7 +10,7 @@ import {
 import { Button } from "../ui/button";
 import { Menu, Dot } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -47,6 +47,14 @@ export function MobileMenu() {
     { name: "Testimonios", href: "/testimonios" },
   ];
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <Drawer direction="left" open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
@@ -54,27 +62,32 @@ export function MobileMenu() {
           <Menu className="text-primary" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent aria-describedby="Menú de navegación móvil">
+      <DrawerContent aria-describedby="mobile-menu-description">
         <DrawerHeader>
           <DrawerTitle>Menú</DrawerTitle>
         </DrawerHeader>
         <nav className="max-h-[calc(100vh-120px)] overflow-y-auto">
           {routes.map((route) => (
             <div key={route.name}>
-              <Link href={route.href} onClick={() => setOpen(false)}>
-                <button className="w-full px-4 py-3 text-left text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-                  <Dot className="size-6 text-primary shrink-0" />
-                  <span>{route.name}</span>
-                </button>
+              <Link
+                href={route.href}
+                onClick={() => setOpen(false)}
+                className="w-full px-4 py-3 text-left text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2"
+              >
+                <Dot className="size-6 text-primary shrink-0" />
+                <span>{route.name}</span>
               </Link>
               {route.subRoutes && (
                 <div>
                   {route.subRoutes.map((subRoute) => (
-                    <Link key={subRoute.name} href={subRoute.href} onClick={() => setOpen(false)}>
-                      <button className="w-full px-4 py-2 pl-8 text-left text-sm hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2">
-                        <Dot className="size-6 text-primary shrink-0" />
-                        <span>{subRoute.name}</span>
-                      </button>
+                    <Link
+                      key={subRoute.name}
+                      href={subRoute.href}
+                      onClick={() => setOpen(false)}
+                      className="w-full px-4 py-2 pl-8 text-left text-sm hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
+                    >
+                      <Dot className="size-6 text-primary shrink-0" />
+                      <span>{subRoute.name}</span>
                     </Link>
                   ))}
                 </div>

@@ -9,8 +9,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function PrivacyPolicyModal() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+  
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -45,10 +54,10 @@ export function PrivacyPolicyModal() {
               2. Uso de la Información
             </h3>
             <p>
-              Utilizamos la información recopilada para procesar pedidos, mejorar
-              nuestros servicios, personalizar su experiencia y enviarle
-              información relevante sobre nuestros productos. Nunca venderemos su
-              información a terceros sin su consentimiento.
+              Utilizamos la información recopilada para procesar pedidos,
+              mejorar nuestros servicios, personalizar su experiencia y enviarle
+              información relevante sobre nuestros productos. Nunca venderemos
+              su información a terceros sin su consentimiento.
             </p>
           </section>
 
@@ -57,9 +66,10 @@ export function PrivacyPolicyModal() {
               3. Cookies y Tecnologías de Rastreo
             </h3>
             <p>
-              Utilizamos cookies para mejorar su experiencia de navegación. Puede
-              controlar las cookies a través de la configuración de su navegador.
-              Algunas cookies son necesarias para el funcionamiento del sitio.
+              Utilizamos cookies para mejorar su experiencia de navegación.
+              Puede controlar las cookies a través de la configuración de su
+              navegador. Algunas cookies son necesarias para el funcionamiento
+              del sitio.
             </p>
           </section>
 
@@ -79,8 +89,8 @@ export function PrivacyPolicyModal() {
               5. Derechos del Usuario
             </h3>
             <p>
-              Tiene derecho a acceder, rectificar, suprimir y portabilidad de sus
-              datos personales. Para ejercer estos derechos, contáctenos a
+              Tiene derecho a acceder, rectificar, suprimir y portabilidad de
+              sus datos personales. Para ejercer estos derechos, contáctenos a
               privacidad@kadash.com.
             </p>
           </section>
@@ -90,16 +100,17 @@ export function PrivacyPolicyModal() {
               6. Cambios en esta Política
             </h3>
             <p>
-              Nos reservamos el derecho de actualizar esta política de privacidad
-              en cualquier momento. Los cambios entrarán en vigencia cuando se
-              publiquen en nuestro sitio web.
+              Nos reservamos el derecho de actualizar esta política de
+              privacidad en cualquier momento. Los cambios entrarán en vigencia
+              cuando se publiquen en nuestro sitio web.
             </p>
           </section>
 
           <section className="space-y-2">
             <h3 className="font-semibold text-foreground">7. Contacto</h3>
             <p>
-              Si tiene preguntas sobre esta política de privacidad, contáctenos a:{" "}
+              Si tiene preguntas sobre esta política de privacidad, contáctenos
+              a:{" "}
               <a
                 href="mailto:privacidad@kadash.com"
                 className="text-primary hover:underline"

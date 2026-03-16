@@ -32,7 +32,7 @@ import { MapPin, Star } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-const PAYMENT_METHOD_MOCK = "MERCADOPAGO";
+const PAYMENT_METHODS = ["MERCADOPAGO", "SISTECREDITO"];
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -44,7 +44,10 @@ export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    null,
+  );
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
 
   const items = useShoppingCartStore((state) => state.items);
   const subtotal = useShoppingCartStore(selectSubtotal);
@@ -62,7 +65,8 @@ export default function CartPage() {
     subtotal >= freeShippingThreshold ? 0 : configShippingCost;
   const total = subtotal + shippingCost;
 
-  const defaultAddressId = addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id;
+  const defaultAddressId =
+    addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id;
   const effectiveAddressId = selectedAddressId ?? defaultAddressId;
 
   const handleCheckout = async () => {
@@ -86,7 +90,8 @@ export default function CartPage() {
 
     setIsCheckoutLoading(true);
     try {
-      if (PAYMENT_METHOD_MOCK === "MERCADOPAGO") {
+      console.log("Checkout payload:", selectedPaymentMethod)
+      if (selectedPaymentMethod === "MERCADOPAGO") {
         const storeId = authPayload.storeId || items[0]?.storeId;
         if (!storeId) {
           toast.error("No se pudo determinar la tienda");
@@ -106,7 +111,7 @@ export default function CartPage() {
           clearCart();
           queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
           toast.success(
-            "Se abrió la ventana de pago. Al terminar verás el estado en tu orden."
+            "Se abrió la ventana de pago. Al terminar verás el estado en tu orden.",
           );
           router.push(`/cuenta/ordenes/${orderId}`);
           return;
@@ -120,7 +125,7 @@ export default function CartPage() {
           price: item.price,
         })),
         total,
-        paymentMethod: PAYMENT_METHOD_MOCK,
+        paymentMethod: selectedPaymentMethod,
         deliveryAddressId,
       };
 
@@ -234,7 +239,7 @@ export default function CartPage() {
                           item.originalPrice > item.price && (
                             <p className="text-sm line-through text-muted-foreground">
                               {currencyFormatter.format(
-                                item.originalPrice * item.quantity
+                                item.originalPrice * item.quantity,
                               )}
                             </p>
                           )}
@@ -263,10 +268,14 @@ export default function CartPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <MapPin className="size-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">Dirección de entrega</span>
+                      <span className="font-medium text-sm">
+                        Dirección de entrega
+                      </span>
                     </div>
                     {addressesLoading ? (
-                      <p className="text-sm text-muted-foreground">Cargando...</p>
+                      <p className="text-sm text-muted-foreground">
+                        Cargando...
+                      </p>
                     ) : addresses.length === 0 ? (
                       <div className="text-sm text-muted-foreground border rounded-lg p-3 bg-muted/50">
                         <p className="mb-2">No tienes direcciones guardadas.</p>
@@ -338,23 +347,43 @@ export default function CartPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
+              <p className="text-sm text-neutral-700">Pagar con</p>
               <Button
                 className="w-full"
                 size="lg"
-                onClick={handleCheckout}
+                variant="outline"
+                onClick={() => {
+                  setSelectedPaymentMethod("MERCADOPAGO");
+                  handleCheckout();
+                }}
                 disabled={
                   isCheckoutLoading ||
                   (isAuthenticated && addresses.length === 0)
                 }
               >
-                {isCheckoutLoading
-                  ? "Procesando..."
-                  : isAuthenticated && addresses.length === 0
-                    ? "Agrega una dirección de entrega"
-                    : "Proceder al Pago"}
+                <Image src="/mercado-pago-wordmark.svg" alt="Mercado Pago" width={96} height={32} className="h-5 w-auto" />
               </Button>
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/productos">Continuar Comprando</Link>
+              <p className="text-sm text-neutral-700">o</p>
+              <Button
+                className="w-full"
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  setSelectedPaymentMethod("SISTECREDITO");
+                  handleCheckout();
+                }}
+                disabled={
+                  isCheckoutLoading ||
+                  (isAuthenticated && addresses.length === 0)
+                }
+              >
+                <Image
+                  src="https://www.sistecredito.com/wp-content/themes/sistecredito/assets/img/logo.svg"
+                  alt="Sistecrédito"
+                  width={96}
+                  height={32}
+                  className="h-3 w-auto"
+                />
               </Button>
             </CardFooter>
           </Card>
