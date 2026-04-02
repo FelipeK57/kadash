@@ -19,20 +19,27 @@ import {
 } from "@/store/shopping-cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import {
-  createCheckoutOrder,
   createMercadoPagoCheckout,
+  createSistecreditoCheckout,
 } from "./services/checkout.service";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ACCOUNT_QUERY_KEY } from "@/app/cuenta/hooks/use-account";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useShippingConfig } from "./hooks/use-shipping-config";
 import { useAddresses } from "@/app/cuenta/hooks/use-addresses";
 import { MapPin, Star } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-
-const PAYMENT_METHOD_MOCK = "MERCADOPAGO";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -44,7 +51,29 @@ export default function CartPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [isSistecreditoLoading, setIsSistecreditoLoading] = useState(false);
+  const [isSistecreditoModalOpen, setIsSistecreditoModalOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [sistecreditoForm, setSistecreditoForm] = useState({
+    paymentMethodId: "1",
+    userType: "NATURAL",
+    currency: "COP",
+    tax: "0",
+    taxBase: "0",
+    isActive: true,
+    status: "PENDING",
+    methodConfirmation: "POST",
+    docType: "CC",
+    document: "",
+    name: "",
+    lastName: "",
+    email: "",
+    indCountry: "CO",
+    phone: "",
+    country: "CO",
+    city: "",
+    address: "",
+  });
 
   const items = useShoppingCartStore((state) => state.items);
   const subtotal = useShoppingCartStore(selectSubtotal);
@@ -64,71 +93,97 @@ export default function CartPage() {
 
   const defaultAddressId = addresses.find((a) => a.isDefault)?.id ?? addresses[0]?.id;
   const effectiveAddressId = selectedAddressId ?? defaultAddressId;
+  const selectedAddress = addresses.find((addr) => addr.id === effectiveAddressId);
 
-  const handleCheckout = async () => {
+  useEffect(() => {
+    setSistecreditoForm((prev) => ({
+      ...prev,
+      taxBase: String(subtotal),
+    }));
+  }, [subtotal]);
+
+  const validateCheckoutPrerequisites = () => {
     if (!isAuthenticated) {
       toast.error("Inicia sesión para proceder al pago");
       router.push("/auth/login");
-      return;
+      return null;
     }
 
     if (addresses.length === 0) {
       toast.error("Agrega al menos una dirección de entrega en tu cuenta");
       router.push("/cuenta");
-      return;
+      return null;
     }
 
     const deliveryAddressId = effectiveAddressId;
     if (!deliveryAddressId) {
       toast.error("Selecciona una dirección de entrega");
-      return;
+      return null;
     }
+
+    return { deliveryAddressId };
+  };
+
+  const openSistecreditoModal = () => {
+    const checkoutData = validateCheckoutPrerequisites();
+    if (!checkoutData) return;
+
+    const fullName = authPayload.name || "";
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || "";
+
+    setSistecreditoForm((prev) => ({
+      ...prev,
+      paymentMethodId: prev.paymentMethodId || "1",
+      taxBase: String(subtotal),
+      document: authPayload.nuip || "",
+      name: firstName,
+      lastName,
+      email: authPayload.email || "",
+      phone: selectedAddress?.phone || authPayload.phone || "",
+      city: selectedAddress?.city || "",
+      address: selectedAddress?.addressLine || "",
+      country: "CO",
+      indCountry: "CO",
+    }));
+
+    setIsSistecreditoModalOpen(true);
+  };
+
+  const handleCheckout = async () => {
+    const checkoutData = validateCheckoutPrerequisites();
+    if (!checkoutData) return;
+
+    const { deliveryAddressId } = checkoutData;
 
     setIsCheckoutLoading(true);
     try {
-      if (PAYMENT_METHOD_MOCK === "MERCADOPAGO") {
-        const storeId = authPayload.storeId || items[0]?.storeId;
-        if (!storeId) {
-          toast.error("No se pudo determinar la tienda");
-          return;
-        }
-        const { init_point, orderId } = await createMercadoPagoCheckout({
-          storeId,
-          cart: items.map((item) => ({
-            variantId: item.variantId,
-            quantity: item.quantity,
-          })),
-          clientId: authPayload.clientId,
-          deliveryAddressId,
-        });
-        if (init_point && orderId) {
-          window.open(init_point, "_blank", "noopener,noreferrer");
-          clearCart();
-          queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
-          toast.success(
-            "Se abrió la ventana de pago. Al terminar verás el estado en tu orden."
-          );
-          router.push(`/cuenta/ordenes/${orderId}`);
-          return;
-        }
+      const storeId = authPayload.storeId || items[0]?.storeId;
+      if (!storeId) {
+        toast.error("No se pudo determinar la tienda");
+        return;
       }
 
-      const payload = {
-        items: items.map((item) => ({
+      const { init_point, orderId } = await createMercadoPagoCheckout({
+        storeId,
+        cart: items.map((item) => ({
           variantId: item.variantId,
           quantity: item.quantity,
-          price: item.price,
         })),
-        total,
-        paymentMethod: PAYMENT_METHOD_MOCK,
+        clientId: authPayload.clientId,
         deliveryAddressId,
-      };
-
-      await createCheckoutOrder(payload);
-      clearCart();
-      queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
-      toast.success("¡Orden creada exitosamente!");
-      router.push("/cuenta");
+      });
+      if (init_point && orderId) {
+        window.open(init_point, "_blank", "noopener,noreferrer");
+        clearCart();
+        queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
+        toast.success(
+          "Se abrió la ventana de pago. Al terminar verás el estado en tu orden."
+        );
+        router.push(`/cuenta/ordenes/${orderId}`);
+        return;
+      }
     } catch (error: unknown) {
       const msg =
         error && typeof error === "object" && "response" in error
@@ -138,6 +193,72 @@ export default function CartPage() {
       toast.error(msg || "Error al procesar el pago");
     } finally {
       setIsCheckoutLoading(false);
+    }
+  };
+
+  const handleSistecreditoCheckout = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const checkoutData = validateCheckoutPrerequisites();
+    if (!checkoutData) return;
+
+    const { deliveryAddressId } = checkoutData;
+    const storeId = authPayload.storeId || items[0]?.storeId;
+
+    if (!storeId) {
+      toast.error("No se pudo determinar la tienda");
+      return;
+    }
+
+    setIsSistecreditoLoading(true);
+    try {
+      const response = await createSistecreditoCheckout({
+        storeId,
+        cart: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+        clientId: authPayload.clientId,
+        deliveryAddressId,
+        paymentMethodId: Number(sistecreditoForm.paymentMethodId || 1),
+        bankCode: null,
+        userType: sistecreditoForm.userType,
+        currency: sistecreditoForm.currency,
+        tax: Number(sistecreditoForm.tax || 0),
+        taxBase: Number(sistecreditoForm.taxBase || subtotal),
+        isActive: sistecreditoForm.isActive,
+        status: sistecreditoForm.status,
+        methodConfirmation: sistecreditoForm.methodConfirmation,
+        docType: sistecreditoForm.docType,
+        document: sistecreditoForm.document,
+        name: sistecreditoForm.name,
+        lastName: sistecreditoForm.lastName,
+        email: sistecreditoForm.email,
+        indCountry: sistecreditoForm.indCountry,
+        phone: sistecreditoForm.phone,
+        country: sistecreditoForm.country,
+        city: sistecreditoForm.city,
+        address: sistecreditoForm.address,
+      });
+
+      if (response.init_point) {
+        window.open(response.init_point, "_blank", "noopener,noreferrer");
+      }
+
+      setIsSistecreditoModalOpen(false);
+      clearCart();
+      queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEY });
+      toast.success("Transacción de Sistecredito creada correctamente");
+      router.push(`/cuenta/ordenes/${response.orderId}`);
+    } catch (error: unknown) {
+      const msg =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : "Error al procesar el pago con Sistecredito";
+      toast.error(msg || "Error al procesar el pago con Sistecredito");
+    } finally {
+      setIsSistecreditoLoading(false);
     }
   };
 
@@ -351,7 +472,21 @@ export default function CartPage() {
                   ? "Procesando..."
                   : isAuthenticated && addresses.length === 0
                     ? "Agrega una dirección de entrega"
-                    : "Proceder al Pago"}
+                    : "Pagar con Mercado Pago"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                size="lg"
+                onClick={openSistecreditoModal}
+                disabled={
+                  isSistecreditoLoading ||
+                  (isAuthenticated && addresses.length === 0)
+                }
+              >
+                {isSistecreditoLoading
+                  ? "Procesando Sistecredito..."
+                  : "Pagar con Sistecredito"}
               </Button>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/productos">Continuar Comprando</Link>
@@ -360,6 +495,134 @@ export default function CartPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isSistecreditoModalOpen} onOpenChange={setIsSistecreditoModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Pago con Sistecredito</DialogTitle>
+            <DialogDescription>
+              Completa los datos para construir la transacción y enviarla a Sistecredito.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSistecreditoCheckout} className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="paymentMethodId">PaymentMethodId</Label>
+              <Input
+                id="paymentMethodId"
+                type="number"
+                value={sistecreditoForm.paymentMethodId}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({
+                    ...prev,
+                    paymentMethodId: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="docType">DocType</Label>
+              <Input
+                id="docType"
+                value={sistecreditoForm.docType}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, docType: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="document">Document</Label>
+              <Input
+                id="document"
+                value={sistecreditoForm.document}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, document: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Nombre</Label>
+              <Input
+                id="name"
+                value={sistecreditoForm.name}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, name: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Apellido</Label>
+              <Input
+                id="lastName"
+                value={sistecreditoForm.lastName}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, lastName: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={sistecreditoForm.email}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, email: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Teléfono</Label>
+              <Input
+                id="phone"
+                value={sistecreditoForm.phone}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, phone: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">Ciudad</Label>
+              <Input
+                id="city"
+                value={sistecreditoForm.city}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, city: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="address">Dirección</Label>
+              <Input
+                id="address"
+                value={sistecreditoForm.address}
+                onChange={(e) =>
+                  setSistecreditoForm((prev) => ({ ...prev, address: e.target.value }))
+                }
+              />
+            </div>
+
+            <DialogFooter className="md:col-span-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsSistecreditoModalOpen(false)}
+                disabled={isSistecreditoLoading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSistecreditoLoading}>
+                {isSistecreditoLoading ? "Creando transacción..." : "Continuar con Sistecredito"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

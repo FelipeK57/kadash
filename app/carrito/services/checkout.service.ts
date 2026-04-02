@@ -43,6 +43,96 @@ export interface MercadoPagoCheckoutResponse {
   orderCode: string;
 }
 
+export interface SistecreditoCheckoutPayload {
+  storeId: number;
+  cart: MercadoPagoCartItem[];
+  clientId?: number;
+  deliveryAddressId?: number;
+  guestEmail?: string;
+  guestPhone?: string;
+  successUrl?: string;
+  paymentMethodId?: number;
+  bankCode?: string | null;
+  userType?: string;
+  currency?: string;
+  tax?: number;
+  taxBase?: number;
+  isActive?: boolean;
+  status?: string;
+  methodConfirmation?: string;
+  docType?: string;
+  document?: string;
+  name?: string;
+  lastName?: string;
+  email?: string;
+  indCountry?: string;
+  phone?: string;
+  country?: string;
+  city?: string;
+  address?: string;
+}
+
+export interface SistecreditoCheckoutResponse {
+  init_point: string | null;
+  orderId: number;
+  orderCode: string;
+  sistecredito?: unknown;
+}
+
+export interface SistecreditoBankOption {
+  code: string;
+  name: string;
+}
+
+const normalizeBankList = (input: unknown): SistecreditoBankOption[] => {
+  if (!input) return [];
+
+  const candidateArrays: unknown[] = [];
+  if (Array.isArray(input)) {
+    candidateArrays.push(input);
+  } else if (typeof input === "object") {
+    const data = input as Record<string, unknown>;
+    candidateArrays.push(
+      data.banks,
+      data.data,
+      data.result,
+      data.items,
+      data.bankList
+    );
+  }
+
+  const list = candidateArrays.find(Array.isArray) as unknown[] | undefined;
+  if (!list) return [];
+
+  return list
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const bank = item as Record<string, unknown>;
+      const code =
+        (bank.bankCode as string | undefined) ??
+        (bank.code as string | undefined) ??
+        (bank.id as string | undefined) ??
+        "";
+      const name =
+        (bank.bankName as string | undefined) ??
+        (bank.name as string | undefined) ??
+        (bank.description as string | undefined) ??
+        code;
+      if (!code) return null;
+      return { code: String(code), name: String(name) };
+    })
+    .filter((bank): bank is SistecreditoBankOption => Boolean(bank));
+};
+
+export async function getSistecreditoBankList(
+  serviceCode: string
+): Promise<SistecreditoBankOption[]> {
+  const res = await api.get("/payments/sistecredito/banks", {
+    params: { serviceCode },
+  });
+  return normalizeBankList(res.data);
+}
+
 /** Reintentar pago Mercado Pago para una orden pendiente (requiere auth cliente). */
 export async function retryMercadoPagoCheckout(orderId: number): Promise<{
   init_point: string;
@@ -64,6 +154,16 @@ export async function createMercadoPagoCheckout(
 ): Promise<MercadoPagoCheckoutResponse> {
   const res = await api.post<MercadoPagoCheckoutResponse>(
     "/payments/checkout",
+    payload
+  );
+  return res.data;
+}
+
+export async function createSistecreditoCheckout(
+  payload: SistecreditoCheckoutPayload
+): Promise<SistecreditoCheckoutResponse> {
+  const res = await api.post<SistecreditoCheckoutResponse>(
+    "/payments/checkout/sistecredito",
     payload
   );
   return res.data;
